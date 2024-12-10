@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/edit_exercise_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Название" />
+
+    <EditText
+        android:id="@+id/edit_exercise_sets"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Подходы"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/edit_exercise_reps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Повторения"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/edit_exercise_weight"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Вес" />
+
+    <EditText
+        android:id="@+id/edit_exercise_rest_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Время отдыха (сек)"
+        android:inputType="number" />
+</LinearLayout>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/workout_name_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Название тренировки" />
+
+    <EditText
+        android:id="@+id/workout_date_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Дата (гггг-мм-дд)" />
+
+    <EditText
+        android:id="@+id/workout_time_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Время (чч:мм)" />
+
+    <EditText
+        android:id="@+id/workout_description_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Описание"
+        android:gravity="top"
+        android:lines="3" />
+
+    <!-- Добавьте другие поля для информации о тренировке -->
+
+    <Button
+        android:id="@+id/add_workout_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Добавить тренировку" />
+
+</LinearLayout>
