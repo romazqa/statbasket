@@ -1,348 +1,201 @@
 package com;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.util.ArrayList;
 
-import net.miginfocom.swing.MigLayout;
+import com.data.Team;
+import com.gui.GuiHelper;
+
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.*;
+import java.util.List;
 
-import com.data.*;
+public class FrmTeam extends javax.swing.JDialog {
 
-public class FrmTeam extends JDialog {
-	private static final long serialVersionUID = 1L;
-	// Поля класса
-	private DBManager manager;
-	 private JTable tblTeam;
-	private JButton btnClose;
-	// кнопка редактирования 
-		private JButton btnEdit;
-		// кнопка добавления 
-		private JButton btnNew;
-		// кнопка удаления 
-		private JButton btnDelete;
-	private TKTableModel tblModel;
-	 @SuppressWarnings("unused")
-	private TableRowSorter<TKTableModel> tblSorter;
-	 private ArrayList<Team> gorrs;
-	 // Конструктор класса
-	 // параметр – менеджер соединения
-	public FrmTeam(DBManager manager){
-	 super();
-	 this.manager=manager;
-	 // Установка модального режима вывода окна
-	 setModal(true);
-	 //при закрытии окна освобождаем используемые им ресурсы
-	 setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-	 // Получение данных
-	 loadData();
-	 // Построение графического интерфейса окна
-	 createGUI();
-	 // Добавление обработчиков для основных событий
-	 bindListeners();
-	//pack();
-	 setSize (700, 500);
-	 // Заголовок окна
-	 setTitle("Команды");
-	 setLocationRelativeTo(this);
-	 }
-	 // Получение данных
-	private void loadData() {
-	 // Получение данных через менеджер
-	 gorrs=manager.loadTeam();
-	 }
-	 // Метод создания пользовательского интерфейса
-	private void createGUI() {
-	 // Создание панели
-	 JPanel pnl = new JPanel(new MigLayout("insets 3, gapy 4",
-	//	JPanel pnl = new JPanel(new MigLayout("insets 3, gap 90! 90!",
-	 "[grow, fill]", "[]5[grow, fill]10[]"));
-	 // Создание объекта таблицы
-	 tblTeam = new JTable();
-	 // Создание объекта табличной модели на базе
-	 // сформированного списка
-	 tblTeam.setModel(tblModel = new TKTableModel(gorrs));
-	 // Создание объекта сортировки для табличной модели
-	 RowSorter<TKTableModel> sorter = new
-	 TableRowSorter<TKTableModel>(tblModel);
-	 // Назначение объекта сортировки таблице
-	 tblTeam.setRowSorter(sorter);
-	 // Задаем параметры внешнего вида таблицы
-	 // Выделение полосой всей текущей строки
-	 tblTeam.setRowSelectionAllowed(true);
-	 // Задаем промежутки между ячейками
-	 tblTeam.setIntercellSpacing(new Dimension(0, 1)); 
-	 // Задаем цвет сетки
-	 tblTeam.setGridColor(new Color(170, 170, 255).darker());
-	 // Автоматическое определение ширины последней колонки
-	 tblTeam.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-	 // Возможность выделения только 1 строки
-	 tblTeam.getSelectionModel().setSelectionMode(
-	 ListSelectionModel.SINGLE_SELECTION);
-	 // Создание области прокрутки и вставка в нее таблицы
-	 JScrollPane scrlPane = new JScrollPane(tblTeam);
-	 scrlPane.getViewport().setBackground(Color.white);
-	 scrlPane.setBorder(BorderFactory.createCompoundBorder
-	(new EmptyBorder(3,0,3,0),scrlPane.getBorder()));
-	 tblTeam.getColumnModel().getColumn(0).setMaxWidth(100);
-	 tblTeam.getColumnModel().getColumn(0).setMinWidth(100);
-	 // Создание кнопки для закрытия формы
-	 btnClose = new JButton("Закрыть");
-	 //Добавление на панель: метки, области с таблицей и кнопки
-	 pnl.add(scrlPane, "grow, span");
-	 pnl.add(btnClose, "growx 0, right");
-	 // Добавление панели в окно
-	 getContentPane().setLayout(
-	 new MigLayout("insets 0 2 0 2, gapy 0", "[grow, fill]",
-	 "[grow, fill]"));
-	 getContentPane().add(pnl, "grow");
-	 pnl.add(getToolBar(),"growx,wrap");//Создание  панели
-//	 pnl.add(new JLabel("Справочник видов техники:"), "growx,span");
-	 	pnl.add(scrlPane, "grow, span");
-	 	pnl.add(btnClose, "growx 0, right");
-	 }
-	 // Метод назначения обработчиков
-	private void bindListeners() {
-	 // Для кнопки Закрыть
-	 btnClose.addActionListener(new ActionListener() {
-	 @Override
-	 public void actionPerformed(ActionEvent e) {
-	 // Закрываем окно
-	 dispose();
-	 }
-	 });
-	//  Для кнопки добавления
-				btnNew.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						addTeam();
-					}
-				});
-				//  Для кнопки редактирования
-				btnEdit.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						editTeam();
-					}
-				});
-				//  Для кнопки удаления
-				btnDelete.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-					deleteTeam();
-					}
-				});
-	 }
-	
-	 private JToolBar getToolBar() {
-	     // Создание панели
-		JToolBar res = new JToolBar();
-		// Неизменяемое положение панели
-		res.setFloatable(false);
-		// Добавление кнопки «Добавить»
-		// Определение местоположения изображения для кнопки
-		URL url = FrmTeam.class.getResource("/images/add.png");
-		// Создание кнопки с изображением
-		btnNew = new JButton(new ImageIcon(url));
-		// На кнопку не устанавливается фокус
-		btnNew.setFocusable(false);
-		//  Добавление всплывающей подсказки для кнопки
-		btnNew.setToolTipText("Добавить новую команду");
-		// Добавление кнопки «Удалить»
-		url = FrmTeam.class.getResource("/images/delete.png");
-		btnDelete = new JButton(new ImageIcon(url));
-		btnDelete.setFocusable(false);
-		btnDelete.setToolTipText("Удалить команду");
-		// Добавление кнопки «Редактировать»
-		url = FrmTeam.class.getResource("/images/edit.png");
-		btnEdit = new JButton(new ImageIcon(url));
-		btnEdit.setFocusable(false);
-		btnEdit.setToolTipText("Изменить данные команды");
-		//  Добавление кнопок на панель
-		res.add(btnNew);
-		res.add(btnEdit);
-		res.add(btnDelete);
-		// Возврат панели в качестве результата
-		return res;
-	   }
-	 
-	//Редактирование текущего клиента
-		private void editTeam() {			
-			int index = tblTeam.getSelectedRow();
-			if (index == -1)
-				return;
-			// Преобразование индекса таблицы в индекс модели
-			int modelRow = tblTeam.convertRowIndexToModel(index);
-			// Получаем объект из модели по индексу
-			Team prod = gorrs.get(modelRow);
-			
-			
-			// Создание объекта окна редактирования
-			EdTeamDialog dlg = new EdTeamDialog(this,
-	    prod,manager);
-			// Вызов окна и проверка кода возврата
-			if (dlg.showDialog() == JDialogResult.OK) {
-	               // Вызов метода обновления строки данных табличной модели
-				tblModel.updateRow(modelRow);
-				System.out.println("Обновление OK");
-				}
-		}
-		// Создание нового 
-			private void addTeam() {
+    private final ApiClient apiClient = new ApiClient();
+    private List<Team> currentTeams;
 
-				// Создание объекта окна редактирования
-				EdTeamDialog dlg = new EdTeamDialog(this, 
-					null,manager);
-				// Вызов окна и проверка кода возврата
-				if (dlg.showDialog() == JDialogResult.OK) {
-					// Создание нового объекта по введенным данным
-					Team prod = dlg.getTeam();
-					//  Добавление его в табличную модель
-					tblModel.addRow(prod);}
+    /**
+     * Creates new form FrmTeam
+     */
+    public FrmTeam(java.awt.Frame parent, boolean modal) {
+        super(parent, modal);
+        initComponents();
+        this.setLocationRelativeTo(parent);
+        loadTeamsAsync();
+    }
 
-			}
-			// Удаление текущего 
-			private void deleteTeam() {
-				// Определяем индекс текущей строки.
-				int index = tblTeam.getSelectedRow();
-				// Если нет выделенной строки, то выход
-				if (index == -1)
-					return;
-				// Вывод запроса на удаления. При отказе - выход
-				if (JOptionPane.showConfirmDialog(this, 
-		  "Удалить команду?", "Подтверждение", 
-		  JOptionPane.YES_NO_OPTION,
-				  JOptionPane.QUESTION_MESSAGE) != 
-				  JOptionPane.YES_OPTION)
-				  return;
-				// Преобразование индекса представления в индекс модели
-				int modelRow = tblTeam.convertRowIndexToModel(index);
-				// Создание объекта для выделенной строки
-				Team prod = gorrs.get(modelRow);
-				try {
-			// Определение кода (первичного ключа) выделенной строки
-				  BigDecimal kod = prod.getId_team();
-				  // Вызов метода менеджера для удаления строки
-				  if (manager.deleteTeam(kod)) {
-				  // Вызов метода удаления строки из табличной модели
-				    tblModel.deleteRow(modelRow);
-				    System.out.println("Удаление OK");
-				  } else
-					JOptionPane.showMessageDialog(this, 
-		"Ошибка удаления строки", "Ошибка", 
-		JOptionPane.ERROR_MESSAGE);
-		
-				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(this, 
-		ex.getMessage(), "Ошибка удаления", 
-		JOptionPane.ERROR_MESSAGE);
-				}
-		
-			}
-	
-	 // Модель данных для таблицы
-	private class TKTableModel extends AbstractTableModel {
+    private void loadTeamsAsync() {
+        lblStatus.setText("Загрузка команд с сервера...");
+        btnAdd.setEnabled(false);
+        btnEdit.setEnabled(false);
+        btnDelete.setEnabled(false);
 
-		private static final long serialVersionUID = 1L;
-	private ArrayList<Team> prods;
-	 // Конструктор объекта класса
-	 public TKTableModel(ArrayList<Team> prods) {
-	 this.prods = prods;
-	 }
-	 // Количество колонок в таблице
-	 @Override
-	 public int getColumnCount() {
-	 return 4;
-	 }
-	 // Количество строк в таблице = размеру списка
-	 @Override
-	 public int getRowCount() {
-	 return (prods==null?0:prods.size());
-	 }
-	 // Определение содержимого ячеек
-	 @Override 
-	 public Object getValueAt(int rowIndex, int columnIndex) {
-	 // Выделяем объект из списка по текущему индексу
-		 Team pr = prods.get(rowIndex);
-	 // Каждой колонке сопоставляем поле объекта
-	 switch (columnIndex) {
-	 case 0:
-	 return pr.getId_team();
-	 case 1:
-	 return pr.getTeam_name();
-	 case 2:
-		 return pr.getCity();
-	 case 3:
-		 return pr.getGender_team();
-	 
-	 default:
-	 return null;
-	 }
-	 }
-	 // Определение названия колонок
-	 @Override
-	 public String getColumnName(int column) {
-	 switch (column) {
-	 case 0:
-	 return "Код";
-	 case 1:
-	 return "Наименование";
-	 case 2:
-		 return "Код города";
-	 case 3:
-		 return "Город";
-		 
-	 default:
-	 return null;
-	 }
-	 }
-	 // Этот метод используется для определения отрисовщика
-	 // ячеек колонок в зависимости от типа данных
-	 @SuppressWarnings({ "unchecked", "rawtypes" })
-	public Class getColumnClass(int c) {
-	 if (c==0) // защита от null в колонке 4
-	 return java.lang.Number.class;
-	 else if (c == 1) // защита от null в колонке 5
-//return Date.class;
-	return java.lang.String.class;
-	 else
-	 return getValueAt(0, c).getClass();
-	 }
+        SwingWorker<List<Team>, Void> worker = new SwingWorker<List<Team>, Void>() {
+            @Override
+            protected List<Team> doInBackground() throws Exception {
+                return apiClient.getAllTeams();
+            }
 
+            @Override
+            protected void done() {
+                try {
+                    currentTeams = get();
+                    GuiHelper.addObjectsToTable(tblTeam, currentTeams);
+                    lblStatus.setText("Команды успешно загружены.");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    lblStatus.setText("Ошибка загрузки команд!");
+                    JOptionPane.showMessageDialog(FrmTeam.this, "Ошибка загрузки: " + e.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    btnAdd.setEnabled(true);
+                    btnEdit.setEnabled(true);
+                    btnDelete.setEnabled(true);
+                }
+            }
+        };
+        worker.execute();
+    }
 
-//Событие добавления строки
-			public void addRow(Team prod) {
-				//  Определяем положение добавляемой строки
-				int len = prods.size();
-				// Добавление в новой строки в список модели
-				prods.add(prod);
-				// Обновление отображения строки с новыми данными
-				fireTableRowsInserted(len, len);
-			}
-			// Событие редактирования
-			public void updateRow(int index) {
-				// Обновление отображения измененной строки
-				fireTableRowsUpdated(index, index);
-			}
-			// Событие удаления
-			public void deleteRow(int index) {
-				//  Если удаленная строка не конце таблицы
-				if (index != prods.size() - 1)
-					fireTableRowsUpdated(index + 1, prods.size() - 1);
-					// Удаление строки из списка модели
-					prods.remove(index);
-					// Обновление отображения после удаления
-					fireTableRowsDeleted(index, index);
-			}
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {
+        // Вызываем НОВЫЙ конструктор: parent=null, modal=true, team=null
+        EdTeamDialog dlg = new EdTeamDialog(null, true, null);
+        dlg.setVisible(true);
 
-		
-			
-	 }
-	}
+        if (dlg.getDialogResult() == JDialogResult.OK) {
+            try {
+                apiClient.saveTeam(dlg.getTeam());
+                loadTeamsAsync(); // Обновляем список
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Ошибка сохранения команды: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
 
- 
+    private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {
+        int selectedRow = tblTeam.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Выберите команду для редактирования.");
+            return;
+        }
+
+        Team selectedTeam = currentTeams.get(selectedRow);
+
+        // Вызываем НОВЫЙ конструктор: parent=null, modal=true, team=selectedTeam
+        EdTeamDialog dlg = new EdTeamDialog(null, true, selectedTeam);
+        dlg.setVisible(true);
+
+        if (dlg.getDialogResult() == JDialogResult.OK) {
+            try {
+                apiClient.saveTeam(dlg.getTeam());
+                loadTeamsAsync(); // Обновляем список
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Ошибка сохранения команды: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {
+        int selectedRow = tblTeam.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Выберите команду для удаления.");
+            return;
+        }
+
+        if (JOptionPane.showConfirmDialog(this, "Вы уверены, что хотите удалить выбранную команду?", "Подтверждение удаления", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            Team selectedTeam = currentTeams.get(selectedRow);
+            try {
+                apiClient.deleteTeam(selectedTeam.getId().intValue());
+                loadTeamsAsync(); // Обновляем список
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Ошибка удаления команды: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {
+        this.dispose();
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">
+    @SuppressWarnings("unchecked")
+    private void initComponents() {
+
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblTeam = new javax.swing.JTable();
+        btnAdd = new javax.swing.JButton();
+        btnEdit = new javax.swing.JButton();
+        btnDelete = new javax.swing.JButton();
+        btnClose = new javax.swing.JButton();
+        lblStatus = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Команды");
+
+        tblTeam.setModel(new javax.swing.table.DefaultTableModel(
+                new Object [][] {},
+                new String [] {"Название", "Город", "Пол"}
+        ));
+        jScrollPane1.setViewportView(tblTeam);
+
+        btnAdd.setText("Добавить");
+        btnAdd.addActionListener(evt -> btnAddActionPerformed(evt));
+
+        btnEdit.setText("Изменить");
+        btnEdit.addActionListener(evt -> btnEditActionPerformed(evt));
+
+        btnDelete.setText("Удалить");
+        btnDelete.addActionListener(evt -> btnDeleteActionPerformed(evt));
+
+        btnClose.setText("Закрыть");
+        btnClose.addActionListener(evt -> btnCloseActionPerformed(evt));
+
+        lblStatus.setText("Статус");
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(btnAdd)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(btnEdit)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(btnDelete)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(btnClose))
+                                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblStatus)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(btnAdd)
+                                        .addComponent(btnEdit)
+                                        .addComponent(btnDelete)
+                                        .addComponent(btnClose))
+                                .addContainerGap())
+        );
+
+        pack();
+    }// </editor-fold>
+
+    // Variables declaration - do not modify
+    private javax.swing.JButton btnAdd;
+    private javax.swing.JButton btnClose;
+    private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnEdit;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblStatus;
+    private javax.swing.JTable tblTeam;
+    // End of variables declaration
+}

@@ -1,49 +1,63 @@
 package com.data;
 
-import java.math.BigDecimal;
-
+// Мы больше не будем использовать BigDecimal для ID на клиенте, чтобы избежать путаницы.
+// Integer вполне достаточно.
 public class Team {
-	 private BigDecimal id_team = null; // Код
-	 private String city = null; 
-	
-	 private String team_name = null; 
+     private Integer id;
+     private String city;
+     private String name; // <-- Имя поля изменено на "name"
+     private String gender; // <-- Имя поля изменено на "gender"
 
-	 private String gender_team= null;
+    // Пустой конструктор обязателен для Jackson
+    public Team() {
+    }
 
-	public BigDecimal getId_team() {
-		return id_team;
-	}
+    // --- Геттеры и Сеттеры ---
 
-	public void setId_team(BigDecimal id_team) {
-		this.id_team = id_team;
-	}
+    public Integer getId() {
+        return id;
+    }
 
-	public String getCity() {
-		return city;
-	}
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-	public void setCity(String city) {
-		this.city = city;
-	}
+    public String getCity() {
+        return city;
+    }
 
-	public String getTeam_name() {
-		return team_name;
-	}
+    public void setCity(String city) {
+        this.city = city;
+    }
 
-	public void setTeam_name(String team_name) {
-		this.team_name = team_name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getGender_team() {
-		return gender_team;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setGender_team(String string) {
-		this.gender_team = string;
-	}
+    public String getGender() {
+        return gender;
+    }
 
-	@Override
-	public String toString() {
-		return team_name+", "+getGender_team();
-	}
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    @Override
+    public String toString() {
+        return name + ", " + gender;
+    }
+    
+    private java.util.List<Player> players = new java.util.ArrayList<>();
+
+    public java.util.List<Player> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(java.util.List<Player> players) {
+        this.players = players;
+    }
 }

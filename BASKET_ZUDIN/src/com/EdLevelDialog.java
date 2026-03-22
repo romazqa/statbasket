@@ -1,198 +1,119 @@
 package com;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Window;
-import java.awt.event.*;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import javax.swing.*;
-import javax.swing.text.MaskFormatter;
 
-import com.data.*;
+import com.data.Level;
+import javax.swing.JOptionPane;
 
-import net.miginfocom.swing.MigLayout;
+public class EdLevelDialog extends javax.swing.JDialog {
 
-public class EdLevelDialog extends JRDialog {
+    private JDialogResult dialogResult;
+    private Level level;
 
-	private static final long serialVersionUID = 1L;
-	// Поля класса
-	  private DBManager manager;
-	  private BigDecimal old_key; // прежнее значение ключа
-	  // Два варианта заголовка окна
-	  private final static String title_add = 
-	    "Добавление нового уровня";
-	  private final static String title_ed = 
-	     "Редактирование уровня";
-	   //  Объектная переменная для класса 
-		private Level type = null;
-	    // Флаг режима «добавление новой строки»
-		private boolean isNewRow = false;
-	    // Форматер для полей дат
-		SimpleDateFormat frmt = 
-	          new SimpleDateFormat("dd-MM-yyyy");
-	    // Элементы (поля редактирования) для полей записи
-		private JTextField edCod;
-		private JTextField edName;
-		//  кнопки
-		private JButton btnOk;
-		private JButton btnCancel;
-	    //  Конструктор класса
-		public EdLevelDialog(Window parent,Level type,
-	                    DBManager manager) {
-	      this.manager = manager;
-	  // Установка флага для режима добавления новой строки
-		  isNewRow = type == null ? true : false;
-		  // Определение заголовка для операций добавл./редакт.
-		  setTitle(isNewRow ? title_add : title_ed);
-		  // Определение объекта редактируемой строки  
-		  if (!isNewRow) {
-		     this.type = type; // Существующий объект
-		     // Сохранение прежнего значения ключа
-		     old_key=type.getKod();
-		     }
-		  else
-		     this.type = new Level();	// Новый объект
-		  // Создание графического интерфейса окна
-		  createGui();
-		  // Назначение обработчиков для основных событий
-		  bindListeners();
-		  //  Получение данных
-		  loadData();
-		  pack();
-		  // Задание режима неизменяемых размеров окна
-		  setResizable(false);
-		  setLocationRelativeTo(parent);
-		}
-		//Метод назначения обработчиков основных событий
-		  private void bindListeners() {
-		   //  Обработчик нажатия клавиш 
-		   setKeyListener(this, new KeyAdapter(){
-		    @Override
-	        // Обработка нажатия клавиши ESC – закрытие окна 
-		    public void keyPressed(KeyEvent e){
-		      if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
-				setDialogResult(JDialogResult.Cancel);
-				close();
-				e.consume();
-			}
-			else
-				super.keyPressed(e);
-			}
-		  });
-	      // Обработка нажатия кнопки закрытия окна  
-		  addWindowListener(new WindowAdapter(){
-			@Override
-			public void windowClosing(WindowEvent e)
-			{
-				close();
-			}
-		  });
-	      //  Обработка  кнопки «Отмена»
-		  btnCancel.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e){
-			  // Возврат Cancel и закрытие окна
-				setDialogResult(JDialogResult.Cancel);
-				close();
-			}
-		  });
-	      //  Обработка  кнопки «Сохранить»
-		  btnOk.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e){
-			  // Проверка данных, выход 
-	  //   при неправильном заполнении полей
-				if (!constructLevel())
-					return;
-				if (isNewRow) {
-	// вызов метода менеджера Добавить новый город
-					if (manager.addLevel(type)) {
-					// при успехе возврат Ok и закрытие окна
-						setDialogResult(JDialogResult.OK);
-						close();
-					}
-				} else 
-	// вызов метода менеджера Изменить строку
-					if (manager.updateLevel(type, old_key)) {
-					setDialogResult(JDialogResult.OK);
-					close();
-				}
-				}
-		  });
-		}
-		  // Метод создания графического интерфейса
-		private void createGui() {
-			// Создание панели
-			JPanel pnl = new JPanel(new MigLayout(
-	"insets 5", "[][]","[]5[]10[]"));
-			// Создание полей для редактирования данных
-	edCod = new JTextField(10);
-			edName = new JTextField(50);
-			
-			//  Создание кнопок
-			btnOk = new JButton("Сохранить");
-			btnCancel = new JButton("Отмена");
-			// Добавление элементов на панель
-			pnl.add(new JLabel("Код"));
-			pnl.add(edCod,"span");
-			pnl.add(new JLabel("Наименование"));
-			pnl.add(edName,"span");
-		
-			pnl.add(btnOk, "span, split 2, center, sg ");
-			pnl.add(btnCancel, "sg 1");
-			//  Добавление панели в окно фрейма
-			getContentPane().setLayout(new BorderLayout());
-			getContentPane().add(pnl, BorderLayout.CENTER);
-		}
-		// Метод формирования маски ввода даты
-		protected MaskFormatter createFormatter(String s) {
-		    MaskFormatter formatter = null;
-		    try {
-		        formatter = new MaskFormatter(s);
-		    } catch (java.text.ParseException exc) {
-		        System.err.println("formatter is bad: " 
-	              + exc.getMessage());
-		        System.exit(-1);
-		    }
-		    return formatter;
-		}
-		//  Метод добавление слушателя клавиатуры 
-	//к компонентам окна
-		private void setKeyListener(Component c, KeyListener kl)
-		{
-		  c.addKeyListener(kl);
-		  if (c instanceof Container)
-		    for (Component comp:((Container)c).getComponents())
-			 setKeyListener(comp, kl);
-		}
-	    // Метод инициализации полей формы (при редактировании)
-		private void loadData() {
-		  if (!isNewRow){
-				edCod.setText(type.getKod().toString());
-			edName.setText(type.getName());
-			
-			}
-		}
-		//Формирование объекта Город перед сохранением
-		private boolean constructLevel()	{
-		  try {
-				type.setKod(edCod.getText().equals("") ? 
-	null : new BigDecimal(edCod.getText()));
-				type.setName(edName.getText());
-				
-				return true;
-		  }
-		  catch (Exception ex){
-			JOptionPane.showMessageDialog(this, 
-	            ex.getMessage(), "Ошибка данных",
-			   JOptionPane.ERROR_MESSAGE);
-			 return false;
-		  }
-		}
-		// Возврат объекта Level
-		public Level getLevel()
-		{
-			return type;
-		}
+    public EdLevelDialog(java.awt.Frame parent, boolean modal, Level level) {
+        super(parent, modal);
+        initComponents();
+        this.setLocationRelativeTo(parent);
+
+        if (level == null) {
+            this.level = new Level();
+            setTitle("Добавление нового уровня");
+        } else {
+            this.level = level;
+            setTitle("Редактирование уровня");
+            fillFields();
+        }
+    }
+
+    public JDialogResult getDialogResult() {
+        return dialogResult;
+    }
+
+    public Level getLevel() {
+        return level;
+    }
+
+    private void fillFields() {
+        tfLevelName.setText(level.getName());
+    }
+
+    private boolean checkAndSave() {
+        String levelName = tfLevelName.getText();
+        if (levelName == null || levelName.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Название уровня не может быть пустым.", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        level.setName(levelName);
+        return true;
+    }
+
+    private void btnOkActionPerformed(java.awt.event.ActionEvent evt) {
+        if (checkAndSave()) {
+            dialogResult = JDialogResult.OK;
+            this.setVisible(false);
+        }
+    }
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {
+        dialogResult = JDialogResult.Cancel;
+        this.setVisible(false);
+    }
+
+    //<editor-fold defaultstate="collapsed" desc="Generated Code">
+    @SuppressWarnings("unchecked")
+    private void initComponents() {
+
+        jLabel1 = new javax.swing.JLabel();
+        tfLevelName = new javax.swing.JTextField();
+        btnOk = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+
+        jLabel1.setText("Наименование уровня:");
+
+        btnOk.setText("OK");
+        btnOk.addActionListener(evt -> btnOkActionPerformed(evt));
+
+        btnCancel.setText("Отмена");
+        btnCancel.addActionListener(evt -> btnCancelActionPerformed(evt));
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addGap(18, 18, 18)
+                        .addComponent(tfLevelName, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnCancel)))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(tfLevelName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnCancel)
+                    .addComponent(btnOk))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        pack();
+    }// </editor-fold>
+
+    // Variables declaration - do not modify
+    private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnOk;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JTextField tfLevelName;
+    // End of variables declaration
 }

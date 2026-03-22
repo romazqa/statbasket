@@ -1,316 +1,287 @@
 package com;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Window;
-import java.awt.event.*;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 
+import com.data.Player;
+import com.data.Team;
 import javax.swing.*;
-import javax.swing.text.MaskFormatter;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.List;
 
-import com.data.*;
+public class EdPlayerDialog extends javax.swing.JDialog {
 
-import net.miginfocom.swing.MigLayout;
+    private JDialogResult dialogResult;
+    private Player player;
+    private final ApiClient apiClient = new ApiClient();
+    private List<Team> teamList; // Локальный список команд для ComboBox
 
-public class EdPlayerDialog extends JRDialog {
+    /**
+     * Creates new form EdPlayerDialog
+     * @param parent
+     * @param modal
+     * @param player Игрок для редактирования или null для создания нового
+     * @param teams Список команд, переданный из родительской формы
+     */
+    public EdPlayerDialog(java.awt.Frame parent, boolean modal, Player player, List<Team> teams) {
+        super(parent, modal);
+        initComponents();
+        this.setLocationRelativeTo(parent);
+        this.teamList = teams;
 
-	private static final long serialVersionUID = 1L;
-	// Поля класса
-	  private DBManager manager;
-	  private BigDecimal old_key; // прежнее значение ключа
-	  // Два варианта заголовка окна
-	  private final static String title_add = 
-	    "Добавление нового игрока";
-	  private final static String title_ed = 
-	     "Редактирование игрока";
-	   //  Объектная переменная для класса Объект .
-		private Player type = null;
-	    // Флаг режима «добавление новой строки»
-		private boolean isNewRow = false;
-	    // Форматер для полей дат
-		SimpleDateFormat frmt = 
-	          new SimpleDateFormat("dd-MM-yyyy");
-	    // Элементы (поля редактирования) для полей записи
-		private JTextField edNum;
-		private JTextField edKod_Team;
-		private JTextField edWeie;
-		private JTextField edHeie;
-		private JTextField edName;
-		private JTextField edDater;
-		private JTextField edRole;
-		private JTextField edGeed;
-		@SuppressWarnings("rawtypes")
-		private JComboBox cmbteaar;
-		//  кнопки
-		private JButton btnOk;
-		private JButton btnCancel;
-	    //  Конструктор класса
-		public EdPlayerDialog(Window parent,Player type,
-	                    DBManager manager) {
-	      this.manager = manager;
-	  // Установка флага для режима добавления новой строки
-		  isNewRow = type == null ? true : false;
-		  // Определение заголовка для операций добавл./редакт.
-		  setTitle(isNewRow ? title_add : title_ed);
-		  // Определение объекта редактируемой строки  
-		  if (!isNewRow) {
-		     this.type = type; // Существующий объект
-		     // Сохранение прежнего значения ключа
-		     old_key=type.getId();
-		     }
-		  else
-		     this.type = new Player();	// Новый объект
-		  // Создание графического интерфейса окна
-		  createGui();
-		  // Назначение обработчиков для основных событий
-		  bindListeners();
-		  //  Получение данных
-		  loadData();
-		  pack();
-		  // Задание режима неизменяемых размеров окна
-		  setResizable(false);
-		  setLocationRelativeTo(parent);
-		}
-		//Метод назначения обработчиков основных событий
-		  private void bindListeners() {
-		   //  Обработчик нажатия клавиш 
-		   setKeyListener(this, new KeyAdapter(){
-		    @Override
-	        // Обработка нажатия клавиши ESC – закрытие окна 
-		    public void keyPressed(KeyEvent e){
-		      if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
-				setDialogResult(JDialogResult.Cancel);
-				close();
-				e.consume();
-			}
-			else
-				super.keyPressed(e);
-			}
-		  });
-	      // Обработка нажатия кнопки закрытия окна  
-		  addWindowListener(new WindowAdapter(){
-			@Override
-			public void windowClosing(WindowEvent e)
-			{
-				close();
-			}
-		  });
-	      //  Обработка  кнопки «Отмена»
-		  btnCancel.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e){
-			  // Возврат Cancel и закрытие окна
-				setDialogResult(JDialogResult.Cancel);
-				close();
-			}
-		  });
-	      //  Обработка  кнопки «Сохранить»
-		  btnOk.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e){
-			  // Проверка данных, выход 
-	  //   при неправильном заполнении полей
-				if (!constructPlayer())
-					return;
-				if (isNewRow) {
-	// вызов метода менеджера Добавить новый объект недв.
-					if (manager.addPlayer(type)) {
-					// при успехе возврат Ok и закрытие окна
-						setDialogResult(JDialogResult.OK);
-						close();
-					}
-				} else 
-	// вызов метода менеджера Изменить строку
-					if (manager.updatePlayer(type, old_key)) {
-					setDialogResult(JDialogResult.OK);
-					close();
-				}
-				}
-		  });
-			// Событие выбора элемента списка
-			cmbteaar.addItemListener(new ItemListener() {
-			 @Override
-			 public void itemStateChanged(ItemEvent e) {
-			 // установка значения поля внешнего ключа
-			 if (e.getStateChange() == ItemEvent.SELECTED) {
-			 if (e.getItem() != null) {
-			 Team gr = (Team) e.getItem();
-			 edKod_Team.setText(gr.getId_team().toString());
-			 }
-			 }
-			 }
-			});
-			// Событие потери фокуса полем ввода
-			edKod_Team.addFocusListener(new FocusListener() {
-			 @Override
-			 public void focusLost(FocusEvent e) {
-			 // При потере фокуса изменяем элемент списка
-				//Проверка на пустоту-добавлена Романом
-				 if(!(edKod_Team.getText().isEmpty())) {
-			 @SuppressWarnings("rawtypes")
-			DefaultComboBoxModel model =
-			(DefaultComboBoxModel) cmbteaar.getModel();
-			 BigDecimal grKod =
-			new BigDecimal(edKod_Team.getText());
-			 setCmbItem(model, grKod);
-			 }
-			 }
-			 @Override
-			 public void focusGained(FocusEvent e) {
-			 }
-			});
-		}
-		  // Метод создания графического интерфейса
-		private void createGui() {
-			// Создание панели
-			JPanel pnl = new JPanel(new MigLayout(
-	"insets 5", "[][]","[]5[]10[]"));
-			// Создание полей для редактирования данных
-	edNum = new JTextField(10);
-	edKod_Team = new JTextField(10);
-			edWeie = new JTextField(20);
-			edHeie = new JTextField(20);
-			edRole = new JTextField(20);
-			cmbteaar = new JComboBox <> ();
-			edName = new JTextField(40);
-			edDater = new JFormattedTextField(
-	                createFormatter("##-##-####"));
-			edDater.setColumns(10);
-			edGeed = new JTextField(20);
-			//  Создание кнопок
-			btnOk = new JButton("Сохранить");
-			btnCancel = new JButton("Отмена");
-			// Добавление элементов на панель
-			pnl.add(new JLabel("Игрок"));
-			pnl.add(edName,"span");
-			pnl.add(new JLabel("Дата рождения"));
-			pnl.add(edDater,"span");
-			pnl.add(new JLabel("Команда"));
-			pnl.add(edKod_Team, "split 2");
-			pnl.add(cmbteaar, "growx, wrap");
-			pnl.add(new JLabel("Рост"));
-			pnl.add(edHeie,"span");
-			pnl.add(new JLabel("Вес"));
-			pnl.add(edWeie,"span");
-		
-			pnl.add(new JLabel("Роль"));
-			pnl.add(edRole,"span");
-			pnl.add(new JLabel("Номер"));
-			pnl.add(edNum,"span");
-			pnl.add(new JLabel("Пол"));
-			pnl.add(edGeed,"span");
-			pnl.add(btnOk, "span, split 2, center, sg ");
-			pnl.add(btnCancel, "sg 1");
-			//  Добавление панели в окно фрейма
-			getContentPane().setLayout(new BorderLayout());
-			getContentPane().add(pnl, BorderLayout.CENTER);
-		}
-		// Метод формирования маски ввода даты
-		protected MaskFormatter createFormatter(String s) {
-		    MaskFormatter formatter = null;
-		    try {
-		        formatter = new MaskFormatter(s);
-		    } catch (java.text.ParseException exc) {
-		        System.err.println("formatter is bad: " 
-	              + exc.getMessage());
-		        System.exit(-1);
-		    }
-		    return formatter;
-		}
-		//  Метод добавление слушателя клавиатуры 
-	//к компонентам окна
-		private void setKeyListener(Component c, KeyListener kl)
-		{
-		  c.addKeyListener(kl);
-		  if (c instanceof Container)
-		    for (Component comp:((Container)c).getComponents())
-			 setKeyListener(comp, kl);
-		}
-	    // Метод инициализации полей формы (при редактировании)
-		@SuppressWarnings("unchecked")
-		private void loadData() {
-		  if (!isNewRow){
-				edHeie.setText(type.getHeight().toString());
-				edNum.setText(type.getNum().toString());
-				edName.setText(type.getName().toString());
-				edKod_Team.setText(type.getTeam().getId_team().toString());
-			edWeie.setText(type.getWeight().toString());
-			edGeed.setText(type.getGender());
-			edDater.setText(type.getBirthday()==null? 
-					   "":frmt.format(type.getBirthday()));
+        populateTeamsComboBox();
 
-			edRole.setText(type.getRole().toString());
-			}
-		// Создание списка
-					// Загружаем данные в список
-				
-					ArrayList<Team> lst = manager.loadTeam();
-					if (lst != null) {
-					 // Создание модели данных на базе списка
-					 @SuppressWarnings({ "rawtypes" })
-					DefaultComboBoxModel model =
-					new DefaultComboBoxModel(lst.toArray());
-					 // Установка модели для JComboBox
-					 cmbteaar.setModel(model);
-					 // Определение поля внешнего ключа
-					 BigDecimal grKod = (isNewRow? null :
-					type.getTeam().getId_team());
-					 // Вызов метода установки элемента списка
-					 // соответствующего значению внешнего ключа
-					 setCmbItem(model, grKod);
-					}
-					} 
-					//Создадим метод установки элемента поля списка
-					// Установка элемента списка
-					private void setCmbItem(@SuppressWarnings("rawtypes") DefaultComboBoxModel model,
-					 BigDecimal grKod) {
-					cmbteaar.setSelectedItem(null);
-					if (grKod != null)
-					 // Просмотр элементов списка для нахождения элемента
-					 // с заданным кодом
-					 for (int i = 0, c = model.getSize(); i < c; i++)
-					 if (((Team) model.getElementAt(i)).
-					getId_team().equals(grKod)) {
-					 cmbteaar.setSelectedIndex(i);
-					 break;
-					 }
-					} 
-		//Формирование объекта О ж. перед сохранением
-		private boolean constructPlayer()	{
-		  try {
-				type.setNum(edNum.getText().equals("") ? 
-	null : new BigDecimal(edNum.getText()));
-				
-				type.setHeight(edHeie.getText().equals("") ? 
-						null : new BigDecimal(edHeie.getText()));
-				type.setWeight(edWeie.getText().equals("") ? 
-						null : new BigDecimal(edWeie.getText()));
-				if (edGeed.getText().toString()!="") 
-					type.setGender(edGeed.getText().toString());	
-				if (edName.getText().toString()!="") 
-					type.setName(edName.getText().toString());	
-				type.setBirthday(edDater.getText().substring(0,
-					      1).trim().equals("") ? null : 
-					      frmt.parse(edDater.getText()));
-				type.setRole(edRole.getText());
-				Object obj = cmbteaar.getSelectedItem();
-				 Team gr = (Team) obj;
-				 type.setTeam(gr);
-return true;
-		  }
-		  catch (Exception ex){
-			JOptionPane.showMessageDialog(this, 
-	            ex.getMessage(), "Ошибка данных",
-			   JOptionPane.ERROR_MESSAGE);
-			 return false;
-		  }
-		}
-		// Возврат объекта Объект недв.
-		public Player getPlayer()
-		{
-			return type;
-		}
+        if (player == null) {
+            this.player = new Player();
+            setTitle("Добавление нового игрока");
+        } else {
+            this.player = player;
+            setTitle("Редактирование игрока");
+            fillFields();
+        }
+    }
+
+    public JDialogResult getDialogResult() {
+        return dialogResult;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    private void populateTeamsComboBox() {
+        cbTeam.removeAllItems();
+        if (teamList == null || teamList.isEmpty()) {
+            cbTeam.addItem("Нет доступных команд");
+            btnOk.setEnabled(false); // Нельзя сохранить игрока без команды
+            return;
+        }
+        for (Team team : teamList) {
+            cbTeam.addItem(team.getName());
+        }
+    }
+
+    private void fillFields() {
+        tfPlayerName.setText(player.getName());
+        tfGameNumber.setText(String.valueOf(player.getGameNumber()));
+        tfHeight.setText(String.valueOf(player.getHeight()));
+        tfWeight.setText(String.valueOf(player.getWeight()));
+        tfRole.setText(player.getRole());
+        tfGender.setText(player.getGender());
+        
+        // --- НОВОЕ: Заполнение даты рождения ---
+        if (player.getBirthday() != null) {
+            // Стандартный формат LocalDate.toString() - это "ГГГГ-ММ-ДД", что нам и нужно
+            tfBirthday.setText(player.getBirthday().toString());
+        }
+        // --- КОНЕЦ НОВОГО БЛОКА ---
+
+        // Выбираем текущую команду игрока в ComboBox
+        if (player.getTeam() != null && teamList != null) {
+            for (int i = 0; i < teamList.size(); i++) {
+                if (teamList.get(i).getId() == player.getTeam().getId()) {
+                    cbTeam.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean checkAndSave() {
+        String playerName = tfPlayerName.getText();
+        if (playerName == null || playerName.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Имя игрока не может быть пустым.", "Ошибка валидации", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        player.setName(playerName);
+        player.setRole(tfRole.getText());
+        player.setGender(tfGender.getText());
+
+        try {
+            player.setGameNumber(Integer.parseInt(tfGameNumber.getText()));
+            player.setHeight(Integer.parseInt(tfHeight.getText()));
+            player.setWeight(Integer.parseInt(tfWeight.getText()));
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Номер, рост и вес должны быть целыми числами.", "Ошибка валидации", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        
+        // --- НОВОЕ: Считывание и проверка даты рождения ---
+        String birthdayText = tfBirthday.getText().trim();
+        if (!birthdayText.isEmpty()) {
+            try {
+                // Пытаемся распарсить строку в дату
+                LocalDate birthday = LocalDate.parse(birthdayText);
+                player.setBirthday(birthday);
+            } catch (DateTimeParseException e) {
+                // Если формат неверный, выводим ошибку
+                JOptionPane.showMessageDialog(this, "Неверный формат даты рождения. Пожалуйста, используйте формат ГГГГ-ММ-ДД.", "Ошибка валидации", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        } else {
+            // Если поле пустое, можно установить null или выдать ошибку, если дата обязательна
+            player.setBirthday(null);
+        }
+        // --- КОНЕЦ НОВОГО БЛОКА ---
+
+        int selectedIndex = cbTeam.getSelectedIndex();
+        if (selectedIndex != -1) {
+            player.setTeam(teamList.get(selectedIndex));
+        } else {
+            JOptionPane.showMessageDialog(this, "Необходимо выбрать команду!", "Ошибка валидации", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
+    private void btnOkActionPerformed(java.awt.event.ActionEvent evt) {
+        if (checkAndSave()) {
+            dialogResult = JDialogResult.OK;
+            this.setVisible(false);
+        }
+    }
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {
+        dialogResult = JDialogResult.Cancel;
+        this.setVisible(false);
+    }
+
+    //<editor-fold defaultstate="collapsed" desc="Generated Code">
+    @SuppressWarnings("unchecked")
+    private void initComponents() {
+
+        jLabel1 = new javax.swing.JLabel();
+        tfPlayerName = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
+        tfGameNumber = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        tfHeight = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        tfWeight = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        tfRole = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        cbTeam = new javax.swing.JComboBox<>();
+        btnOk = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        jLabel7 = new javax.swing.JLabel();
+        tfGender = new javax.swing.JTextField();
+        jLabelBirthday = new javax.swing.JLabel(); // НОВОЕ
+        tfBirthday = new javax.swing.JTextField();   // НОВОЕ
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+
+        jLabel1.setText("ФИО игрока:");
+        jLabel2.setText("Номер:");
+        jLabel3.setText("Рост (см):");
+        jLabel4.setText("Вес (кг):");
+        jLabel5.setText("Амплуа:");
+        jLabel6.setText("Команда:");
+        jLabel7.setText("Пол (М/Ж):");
+        jLabelBirthday.setText("Дата рождения (ГГГГ-ММ-ДД):"); // НОВОЕ
+
+        btnOk.setText("OK");
+        btnOk.addActionListener(evt -> btnOkActionPerformed(evt));
+
+        btnCancel.setText("Отмена");
+        btnCancel.addActionListener(evt -> btnCancelActionPerformed(evt));
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabelBirthday) // НОВОЕ
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel5)
+                            .addComponent(jLabel7)
+                            .addComponent(jLabel6))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(tfPlayerName)
+                            .addComponent(tfGameNumber)
+                            .addComponent(tfHeight)
+                            .addComponent(tfWeight)
+                            .addComponent(tfRole)
+                            .addComponent(tfGender)
+                            .addComponent(tfBirthday) // НОВОЕ
+                            .addComponent(cbTeam, 0, 200, Short.MAX_VALUE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnCancel)))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(tfPlayerName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                // НОВЫЙ БЛОК ДЛЯ ДАТЫ РОЖДЕНИЯ
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelBirthday)
+                    .addComponent(tfBirthday, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                // КОНЕЦ НОВОГО БЛОКА
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(tfGameNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(tfHeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(tfWeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(tfRole, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(tfGender, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(cbTeam, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnCancel)
+                    .addComponent(btnOk))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        pack();
+    }// </editor-fold>
+
+    // Variables declaration - do not modify
+    private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnOk;
+    private javax.swing.JComboBox<String> cbTeam;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabelBirthday; // НОВОЕ
+    private javax.swing.JTextField tfGameNumber;
+    private javax.swing.JTextField tfGender;
+    private javax.swing.JTextField tfHeight;
+    private javax.swing.JTextField tfPlayerName;
+    private javax.swing.JTextField tfRole;
+    private javax.swing.JTextField tfWeight;
+    private javax.swing.JTextField tfBirthday; // НОВОЕ
+    // End of variables declaration
 }

@@ -1,24 +1,30 @@
 package com.data;
 
-import java.math.BigDecimal;
-
 public class Level {
-	private BigDecimal kod = null; // Код
-	 public BigDecimal getKod() {
-		return kod;
-	}
-	public void setKod(BigDecimal kod) {
-		this.kod = kod;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	private String name = null; // Наим-е
-	@Override
-	public String toString() {
-		return name;
-	}
+    private Integer id;
+    private String name;
+
+    public Level() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
