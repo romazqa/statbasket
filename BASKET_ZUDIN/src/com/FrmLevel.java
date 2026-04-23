@@ -17,17 +17,26 @@ public class FrmLevel extends javax.swing.JDialog {
     public FrmLevel(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        
+        // РЈСЃС‚Р°РЅРѕРІРєР° РёРјРµРЅ РґР»СЏ UI-С‚РµСЃС‚РѕРІ
+        tblLevel.setName("tblLevel");
+        btnAdd.setName("btnAdd");
+        btnEdit.setName("btnEdit");
+        btnDelete.setName("btnDelete");
+        btnClose.setName("btnClose");
+        lblStatus.setName("lblStatus");
+        
         this.setLocationRelativeTo(parent);
         loadLevelsAsync();
     }
 
     private void loadLevelsAsync() {
-        lblStatus.setText("Загрузка уровней соревнований...");
+        lblStatus.setText("Р—Р°РіСЂСѓР·РєР° СѓСЂРѕРІРЅРµР№ СЃРѕСЂРµРІРЅРѕРІР°РЅРёР№...");
         btnAdd.setEnabled(false);
         btnEdit.setEnabled(false);
         btnDelete.setEnabled(false);
 
-        SwingWorker<List<Level>, Void> worker = new SwingWorker<>() {
+        SwingWorker<List<Level>, Void> worker = new SwingWorker<List<Level>, Void>() {
             @Override
             protected List<Level> doInBackground() throws Exception {
                 return apiClient.getAllLevels();
@@ -38,11 +47,11 @@ public class FrmLevel extends javax.swing.JDialog {
                 try {
                     currentLevels = get();
                     GuiHelper.addObjectsToTable(tblLevel, currentLevels);
-                    lblStatus.setText("Данные успешно загружены.");
+                    lblStatus.setText("Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ Р·Р°РіСЂСѓР¶РµРЅС‹.");
                 } catch (Exception e) {
                     e.printStackTrace();
-                    lblStatus.setText("Ошибка загрузки!");
-                    JOptionPane.showMessageDialog(FrmLevel.this, "Ошибка загрузки: " + e.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                    lblStatus.setText("РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё!");
+                    JOptionPane.showMessageDialog(FrmLevel.this, "РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё: " + e.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
                 } finally {
                     btnAdd.setEnabled(true);
                     btnEdit.setEnabled(true);
@@ -62,7 +71,7 @@ public class FrmLevel extends javax.swing.JDialog {
                 loadLevelsAsync();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка сохранения: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: " + ex.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -70,7 +79,7 @@ public class FrmLevel extends javax.swing.JDialog {
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {
         int selectedRow = tblLevel.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Выберите уровень для редактирования.");
+            JOptionPane.showMessageDialog(this, "Р’С‹Р±РµСЂРёС‚Рµ СѓСЂРѕРІРµРЅСЊ РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ.");
             return;
         }
 
@@ -83,7 +92,7 @@ public class FrmLevel extends javax.swing.JDialog {
                 loadLevelsAsync();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка сохранения: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: " + ex.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -91,18 +100,18 @@ public class FrmLevel extends javax.swing.JDialog {
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {
         int selectedRow = tblLevel.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Выберите уровень для удаления.");
+            JOptionPane.showMessageDialog(this, "Р’С‹Р±РµСЂРёС‚Рµ СѓСЂРѕРІРµРЅСЊ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ.");
             return;
         }
 
-        if (JOptionPane.showConfirmDialog(this, "Удалить выбранный уровень?", "Подтверждение", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+        if (JOptionPane.showConfirmDialog(this, "Р’С‹ СѓРІРµСЂРµРЅС‹, С‡С‚Рѕ С…РѕС‚РёС‚Рµ СѓРґР°Р»РёС‚СЊ РІС‹Р±СЂР°РЅРЅС‹Р№ СѓСЂРѕРІРµРЅСЊ?", "РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             Level selectedLevel = currentLevels.get(selectedRow);
             try {
                 apiClient.deleteLevel(selectedLevel.getId());
                 loadLevelsAsync();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка удаления: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ: " + ex.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -124,27 +133,27 @@ public class FrmLevel extends javax.swing.JDialog {
         lblStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Уровни соревнований");
+        setTitle("РЈСЂРѕРІРЅРё СЃРѕСЂРµРІРЅРѕРІР°РЅРёР№");
 
         tblLevel.setModel(new javax.swing.table.DefaultTableModel(
                 new Object [][] {},
-                new String [] {"Наименование уровня"}
+                new String [] {"РќР°РёРјРµРЅРѕРІР°РЅРёРµ СѓСЂРѕРІРЅСЏ"}
         ));
         jScrollPane1.setViewportView(tblLevel);
 
-        btnAdd.setText("Добавить");
+        btnAdd.setText("Р”РѕР±Р°РІРёС‚СЊ");
         btnAdd.addActionListener(evt -> btnAddActionPerformed(evt));
 
-        btnEdit.setText("Изменить");
+        btnEdit.setText("РР·РјРµРЅРёС‚СЊ");
         btnEdit.addActionListener(evt -> btnEditActionPerformed(evt));
 
-        btnDelete.setText("Удалить");
+        btnDelete.setText("РЈРґР°Р»РёС‚СЊ");
         btnDelete.addActionListener(evt -> btnDeleteActionPerformed(evt));
         
-        btnClose.setText("Закрыть");
+        btnClose.setText("Р—Р°РєСЂС‹С‚СЊ");
         btnClose.addActionListener(evt -> btnCloseActionPerformed(evt));
 
-        lblStatus.setText("Статус");
+        lblStatus.setText("РЎС‚Р°С‚СѓСЃ");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -192,5 +201,4 @@ public class FrmLevel extends javax.swing.JDialog {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblLevel;
-    // End of variables declaration
 }

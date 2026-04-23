@@ -12,18 +12,27 @@ public class EdPlayerDialog extends javax.swing.JDialog {
     private JDialogResult dialogResult;
     private Player player;
     private final ApiClient apiClient = new ApiClient();
-    private List<Team> teamList; // Локальный список команд для ComboBox
+    private List<Team> teamList; // Р›РѕРєР°Р»СЊРЅС‹Р№ СЃРїРёСЃРѕРє РєРѕРјР°РЅРґ РґР»СЏ ComboBox
 
     /**
-     * Creates new form EdPlayerDialog
-     * @param parent
-     * @param modal
-     * @param player Игрок для редактирования или null для создания нового
-     * @param teams Список команд, переданный из родительской формы
+     * РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РґРёР°Р»РѕРіР° СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ РёРіСЂРѕРєР°
      */
     public EdPlayerDialog(java.awt.Frame parent, boolean modal, Player player, List<Team> teams) {
         super(parent, modal);
         initComponents();
+        
+        // РЈСЃС‚Р°РЅРѕРІРєР° РёРјРµРЅ РґР»СЏ UI-С‚РµСЃС‚РѕРІ (AssertJ Swing)
+        tfPlayerName.setName("tfPlayerName");
+        tfGameNumber.setName("tfGameNumber");
+        tfHeight.setName("tfHeight");
+        tfWeight.setName("tfWeight");
+        tfRole.setName("tfRole");
+        tfGender.setName("tfGender");
+        tfBirthday.setName("tfBirthday");
+        cbTeam.setName("cbTeam");
+        btnOk.setName("btnOk");
+        btnCancel.setName("btnCancel");
+
         this.setLocationRelativeTo(parent);
         this.teamList = teams;
 
@@ -31,10 +40,10 @@ public class EdPlayerDialog extends javax.swing.JDialog {
 
         if (player == null) {
             this.player = new Player();
-            setTitle("Добавление нового игрока");
+            setTitle("Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕРіРѕ РёРіСЂРѕРєР°");
         } else {
             this.player = player;
-            setTitle("Редактирование игрока");
+            setTitle("Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РёРіСЂРѕРєР°");
             fillFields();
         }
     }
@@ -50,8 +59,8 @@ public class EdPlayerDialog extends javax.swing.JDialog {
     private void populateTeamsComboBox() {
         cbTeam.removeAllItems();
         if (teamList == null || teamList.isEmpty()) {
-            cbTeam.addItem("Нет доступных команд");
-            btnOk.setEnabled(false); // Нельзя сохранить игрока без команды
+            cbTeam.addItem("РќРµС‚ РґРѕСЃС‚СѓРїРЅС‹С… РєРѕРјР°РЅРґ");
+            btnOk.setEnabled(false); 
             return;
         }
         for (Team team : teamList) {
@@ -61,23 +70,19 @@ public class EdPlayerDialog extends javax.swing.JDialog {
 
     private void fillFields() {
         tfPlayerName.setText(player.getName());
-        tfGameNumber.setText(String.valueOf(player.getGameNumber()));
-        tfHeight.setText(String.valueOf(player.getHeight()));
-        tfWeight.setText(String.valueOf(player.getWeight()));
+        tfGameNumber.setText(String.valueOf(player.getGameNumber() != null ? player.getGameNumber() : ""));
+        tfHeight.setText(String.valueOf(player.getHeight() != null ? player.getHeight() : ""));
+        tfWeight.setText(String.valueOf(player.getWeight() != null ? player.getWeight() : ""));
         tfRole.setText(player.getRole());
         tfGender.setText(player.getGender());
         
-        // --- НОВОЕ: Заполнение даты рождения ---
         if (player.getBirthday() != null) {
-            // Стандартный формат LocalDate.toString() - это "ГГГГ-ММ-ДД", что нам и нужно
             tfBirthday.setText(player.getBirthday().toString());
         }
-        // --- КОНЕЦ НОВОГО БЛОКА ---
 
-        // Выбираем текущую команду игрока в ComboBox
         if (player.getTeam() != null && teamList != null) {
             for (int i = 0; i < teamList.size(); i++) {
-                if (teamList.get(i).getId() == player.getTeam().getId()) {
+                if (teamList.get(i).getId().equals(player.getTeam().getId())) {
                     cbTeam.setSelectedIndex(i);
                     break;
                 }
@@ -88,7 +93,7 @@ public class EdPlayerDialog extends javax.swing.JDialog {
     private boolean checkAndSave() {
         String playerName = tfPlayerName.getText();
         if (playerName == null || playerName.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Имя игрока не может быть пустым.", "Ошибка валидации", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "РРјСЏ РёРіСЂРѕРєР° РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј.", "РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         player.setName(playerName);
@@ -100,33 +105,28 @@ public class EdPlayerDialog extends javax.swing.JDialog {
             player.setHeight(Integer.parseInt(tfHeight.getText()));
             player.setWeight(Integer.parseInt(tfWeight.getText()));
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Номер, рост и вес должны быть целыми числами.", "Ошибка валидации", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "РќРѕРјРµСЂ, СЂРѕСЃС‚ Рё РІРµСЃ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ С†РµР»С‹РјРё С‡РёСЃР»Р°РјРё.", "РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         
-        // --- НОВОЕ: Считывание и проверка даты рождения ---
         String birthdayText = tfBirthday.getText().trim();
         if (!birthdayText.isEmpty()) {
             try {
-                // Пытаемся распарсить строку в дату
                 LocalDate birthday = LocalDate.parse(birthdayText);
                 player.setBirthday(birthday);
             } catch (DateTimeParseException e) {
-                // Если формат неверный, выводим ошибку
-                JOptionPane.showMessageDialog(this, "Неверный формат даты рождения. Пожалуйста, используйте формат ГГГГ-ММ-ДД.", "Ошибка валидации", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РќРµРІРµСЂРЅС‹Р№ С„РѕСЂРјР°С‚ РґР°С‚С‹ СЂРѕР¶РґРµРЅРёСЏ. РСЃРїРѕР»СЊР·СѓР№С‚Рµ Р“Р“Р“Р“-РњРњ-Р”Р”.", "РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         } else {
-            // Если поле пустое, можно установить null или выдать ошибку, если дата обязательна
             player.setBirthday(null);
         }
-        // --- КОНЕЦ НОВОГО БЛОКА ---
 
         int selectedIndex = cbTeam.getSelectedIndex();
-        if (selectedIndex != -1) {
+        if (selectedIndex != -1 && teamList != null && !teamList.isEmpty()) {
             player.setTeam(teamList.get(selectedIndex));
         } else {
-            JOptionPane.showMessageDialog(this, "Необходимо выбрать команду!", "Ошибка валидации", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "РќРµРѕР±С…РѕРґРёРјРѕ РІС‹Р±СЂР°С‚СЊ РєРѕРјР°РЅРґСѓ!", "РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         return true;
@@ -164,24 +164,24 @@ public class EdPlayerDialog extends javax.swing.JDialog {
         btnCancel = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
         tfGender = new javax.swing.JTextField();
-        jLabelBirthday = new javax.swing.JLabel(); // НОВОЕ
-        tfBirthday = new javax.swing.JTextField();   // НОВОЕ
+        jLabelBirthday = new javax.swing.JLabel();
+        tfBirthday = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jLabel1.setText("ФИО игрока:");
-        jLabel2.setText("Номер:");
-        jLabel3.setText("Рост (см):");
-        jLabel4.setText("Вес (кг):");
-        jLabel5.setText("Амплуа:");
-        jLabel6.setText("Команда:");
-        jLabel7.setText("Пол (М/Ж):");
-        jLabelBirthday.setText("Дата рождения (ГГГГ-ММ-ДД):"); // НОВОЕ
+        jLabel1.setText("Р¤РРћ РёРіСЂРѕРєР°:");
+        jLabel2.setText("РќРѕРјРµСЂ:");
+        jLabel3.setText("Р РѕСЃС‚ (СЃРј):");
+        jLabel4.setText("Р’РµСЃ (РєРі):");
+        jLabel5.setText("РђРјРїР»СѓР°:");
+        jLabel6.setText("РљРѕРјР°РЅРґР°:");
+        jLabel7.setText("РџРѕР» (Рњ/Р–):");
+        jLabelBirthday.setText("Р”Р°С‚Р° СЂРѕР¶РґРµРЅРёСЏ (Р“Р“Р“Р“-РњРњ-Р”Р”):");
 
         btnOk.setText("OK");
         btnOk.addActionListener(evt -> btnOkActionPerformed(evt));
 
-        btnCancel.setText("Отмена");
+        btnCancel.setText("РћС‚РјРµРЅР°");
         btnCancel.addActionListener(evt -> btnCancelActionPerformed(evt));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -193,7 +193,7 @@ public class EdPlayerDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabelBirthday) // НОВОЕ
+                            .addComponent(jLabelBirthday)
                             .addComponent(jLabel1)
                             .addComponent(jLabel2)
                             .addComponent(jLabel3)
@@ -209,7 +209,7 @@ public class EdPlayerDialog extends javax.swing.JDialog {
                             .addComponent(tfWeight)
                             .addComponent(tfRole)
                             .addComponent(tfGender)
-                            .addComponent(tfBirthday) // НОВОЕ
+                            .addComponent(tfBirthday)
                             .addComponent(cbTeam, 0, 200, Short.MAX_VALUE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
@@ -226,12 +226,10 @@ public class EdPlayerDialog extends javax.swing.JDialog {
                     .addComponent(jLabel1)
                     .addComponent(tfPlayerName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                // НОВЫЙ БЛОК ДЛЯ ДАТЫ РОЖДЕНИЯ
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabelBirthday)
                     .addComponent(tfBirthday, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                // КОНЕЦ НОВОГО БЛОКА
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(tfGameNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -264,7 +262,6 @@ public class EdPlayerDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>
 
-    // Variables declaration - do not modify
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnOk;
     private javax.swing.JComboBox<String> cbTeam;
@@ -275,13 +272,12 @@ public class EdPlayerDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabelBirthday; // НОВОЕ
+    private javax.swing.JLabel jLabelBirthday;
     private javax.swing.JTextField tfGameNumber;
     private javax.swing.JTextField tfGender;
     private javax.swing.JTextField tfHeight;
     private javax.swing.JTextField tfPlayerName;
     private javax.swing.JTextField tfRole;
     private javax.swing.JTextField tfWeight;
-    private javax.swing.JTextField tfBirthday; // НОВОЕ
-    // End of variables declaration
+    private javax.swing.JTextField tfBirthday;
 }

@@ -55,6 +55,7 @@ public class MainWindow extends javax.swing.JFrame {
         JButton btn = new JButton("<html><center><font size='6'>" + icon + "</font><br>" + text + "</center></html>");
         btn.setFont(new Font("Tahoma", Font.BOLD, 14));
         btn.setFocusPainted(false);
+        btn.setName(text); 
         return btn;
     }
 

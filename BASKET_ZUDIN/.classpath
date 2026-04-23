@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry including="**/*.java" kind="src" output="target/test-classes" path="src">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_66/lib/postgresql-42.2.18.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_66/lib/miglayout-3.5.5.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_66/lib/looks-2.2.1.jar"/>
@@ -42,9 +48,9 @@
 	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_66/lib/poi-scratchpad-5.2.3.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_66/lib/sa-jdi.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_66/lib/tools.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17">
 		<attributes>
-			<attribute name="module" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_66/lib/commons-codec-1.15.jar"/>
@@ -106,5 +112,14 @@
 	<classpathentry kind="lib" path="C:/Users/ASUS/Downloads/jackson-annotations-2.17.3.jar"/>
 	<classpathentry kind="lib" path="C:/Users/ASUS/Downloads/jackson-core-2.17.3.jar"/>
 	<classpathentry kind="lib" path="C:/Users/ASUS/Downloads/jackson-datatype-jsr310-2.17.3.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_66/assertj-core-3.24.2.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_66/assertj-swing-3.17.1.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.8.0_66/assertj-swing-junit-3.17.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>

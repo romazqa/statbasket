@@ -11,14 +11,18 @@ public class EdLevelDialog extends javax.swing.JDialog {
     public EdLevelDialog(java.awt.Frame parent, boolean modal, Level level) {
         super(parent, modal);
         initComponents();
+        
+        // Ð£ÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ° Ð¸Ð¼ÐµÐ½Ð¸ Ð´Ð»Ñ UI-Ñ‚ÐµÑÑ‚Ð¾Ð²
+        tfLevelName.setName("tfLevelName");
+        
         this.setLocationRelativeTo(parent);
 
         if (level == null) {
             this.level = new Level();
-            setTitle("Äîáàâëåíèå íîâîãî óðîâíÿ");
+            setTitle("Ð”Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Ð½Ð¾Ð²Ð¾Ð³Ð¾ ÑƒÑ€Ð¾Ð²Ð½Ñ");
         } else {
             this.level = level;
-            setTitle("Ðåäàêòèðîâàíèå óðîâíÿ");
+            setTitle("Ð ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ ÑƒÑ€Ð¾Ð²Ð½Ñ");
             fillFields();
         }
     }
@@ -38,7 +42,7 @@ public class EdLevelDialog extends javax.swing.JDialog {
     private boolean checkAndSave() {
         String levelName = tfLevelName.getText();
         if (levelName == null || levelName.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Íàçâàíèå óðîâíÿ íå ìîæåò áûòü ïóñòûì.", "Îøèáêà", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ ÑƒÑ€Ð¾Ð²Ð½Ñ Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ð¿ÑƒÑÑ‚Ñ‹Ð¼.", "ÐžÑˆÐ¸Ð±ÐºÐ°", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         level.setName(levelName);
@@ -68,12 +72,12 @@ public class EdLevelDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jLabel1.setText("Íàèìåíîâàíèå óðîâíÿ:");
+        jLabel1.setText("ÐÐ°Ð¸Ð¼ÐµÐ½Ð¾Ð²Ð°Ð½Ð¸Ðµ ÑƒÑ€Ð¾Ð²Ð½Ñ:");
 
         btnOk.setText("OK");
         btnOk.addActionListener(evt -> btnOkActionPerformed(evt));
 
-        btnCancel.setText("Îòìåíà");
+        btnCancel.setText("ÐžÑ‚Ð¼ÐµÐ½Ð°");
         btnCancel.addActionListener(evt -> btnCancelActionPerformed(evt));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

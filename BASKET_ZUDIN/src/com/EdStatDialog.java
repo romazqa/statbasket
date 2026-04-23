@@ -8,7 +8,6 @@ import java.awt.event.*;
 import java.util.List;
 
 import javax.swing.*;
-import javax.swing.text.MaskFormatter;
 import com.data.*;
 
 import net.miginfocom.swing.MigLayout;
@@ -17,23 +16,23 @@ public class EdStatDialog extends JRDialog {
 
     private static final long serialVersionUID = 1L;
     
-    // API клиент для работы с сетью
+    // API РєР»РёРµРЅС‚ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ СЃРµС‚СЊСЋ
     private final ApiClient apiClient = new ApiClient();
     
-    private Integer fk_key; // ID матча
-    private Integer old_key; // прежнее значение ключа
+    private Integer fk_key; // ID РјР°С‚С‡Р°
+    private Integer old_key; // РџСЂРµР¶РЅРµРµ Р·РЅР°С‡РµРЅРёРµ РєР»СЋС‡Р° СЃС‚Р°С‚РёСЃС‚РёРєРё
     
-    // Заголовки
-    private final static String title_add = "Добавление новой информации";
-    private final static String title_ed = "Редактирование статистики";
+    // Р—Р°РіРѕР»РѕРІРєРё РѕРєРЅР°
+    private final static String title_add = "Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕР№ РёРЅС„РѕСЂРјР°С†РёРё";
+    private final static String title_ed = "Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ СЃС‚Р°С‚РёСЃС‚РёРєРё";
     
-    // Объект статистики
+    // РћР±СЉРµРєС‚ СЃС‚Р°С‚РёСЃС‚РёРєРё
     private Stat type = null;
     
-    // Флаг режима «добавление новой строки»
+    // Р¤Р»Р°Рі СЂРµР¶РёРјР° В«РґРѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕР№ СЃС‚СЂРѕРєРёВ»
     private boolean isNewRow = false;
     
-    // Элементы UI
+    // Р­Р»РµРјРµРЅС‚С‹ UI (РїРѕР»СЏ РІРІРѕРґР°)
     private JTextField edpointscored;
     private JTextField edAssistsoim;
     private JTextField edSteal;
@@ -41,42 +40,41 @@ public class EdStatDialog extends JRDialog {
     private JTextField edDr, edOr, edFree;
     private JTextField edTurnover, edBlockedshot, edFoull;
 
-    private JComboBox<Player> cmbPerso; // Типизированный ComboBox
+    private JComboBox<Player> cmbPerso; // РўРёРїРёР·РёСЂРѕРІР°РЅРЅС‹Р№ СЃРїРёСЃРѕРє РёРіСЂРѕРєРѕРІ
     private JTextField edCod_perso;
     
-    // Кнопки
+    // РљРЅРѕРїРєРё СѓРїСЂР°РІР»РµРЅРёСЏ
     private JButton btnOk;
     private JButton btnCancel;
     
-    // Список игроков для ComboBox
+    // РЎРїРёСЃРѕРє РІСЃРµС… РёРіСЂРѕРєРѕРІ РґР»СЏ РІС‹РїР°РґР°СЋС‰РµРіРѕ СЃРїРёСЃРєР°
     private List<Player> playerList;
 
     /**
-     * Конструктор класса
+     * РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РґРёР°Р»РѕРіР° СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ СЃС‚Р°С‚РёСЃС‚РёРєРё
      */
     public EdStatDialog(Frame parent, Stat type, Integer fk_key) {
-        super(parent, true); // Вызываем конструктор JRDialog(Frame, boolean)
+        super(parent, true); // Р’С‹Р·С‹РІР°РµРј РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ JRDialog(Frame, boolean)
         
-        // Установка флага
+        // РћРїСЂРµРґРµР»РµРЅРёРµ СЂРµР¶РёРјР° СЂР°Р±РѕС‚С‹ (СЃРѕР·РґР°РЅРёРµ РёР»Рё СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ)
         isNewRow = type == null;
         setTitle(isNewRow ? title_add : title_ed);
         this.fk_key = fk_key;
         
-        // Определение объекта
         if (!isNewRow) {
-            this.type = type; // Существующий объект
+            this.type = type; 
             old_key = type.getIdPlayerStats();
         } else {
-            this.type = new Stat(); // Новый объект
+            this.type = new Stat(); 
         }
         
-        // Создание UI
+        // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РёРЅС‚РµСЂС„РµР№СЃР°
         createGui();
         
-        // Назначение обработчиков
+        // РќР°Р·РЅР°С‡РµРЅРёРµ СЃР»СѓС€Р°С‚РµР»РµР№ СЃРѕР±С‹С‚РёР№
         bindListeners();
         
-        // Получение данных (асинхронно)
+        // РђСЃРёРЅС…СЂРѕРЅРЅР°СЏ Р·Р°РіСЂСѓР·РєР° СЃРїРёСЃРєР° РёРіСЂРѕРєРѕРІ СЃ СЃРµСЂРІРµСЂР°
         loadDataAsync();
         
         setSize(900, 500);
@@ -84,16 +82,14 @@ public class EdStatDialog extends JRDialog {
         setLocationRelativeTo(parent);
     }
 
-    // --- Асинхронная загрузка данных ---
     private void loadDataAsync() {
-        // Блокируем интерфейс пока грузим
+        // Р‘Р»РѕРєРёСЂСѓРµРј РІС‹Р±РѕСЂ РёРіСЂРѕРєР° Рё РєРЅРѕРїРєСѓ СЃРѕС…СЂР°РЅРµРЅРёСЏ РЅР° РІСЂРµРјСЏ Р·Р°РіСЂСѓР·РєРё
         cmbPerso.setEnabled(false);
         btnOk.setEnabled(false);
         
         SwingWorker<List<Player>, Void> worker = new SwingWorker<>() {
             @Override
             protected List<Player> doInBackground() throws Exception {
-                // Загружаем всех игроков с сервера
                 return apiClient.getAllPlayers();
             }
 
@@ -103,16 +99,14 @@ public class EdStatDialog extends JRDialog {
                     playerList = get();
                     populateComboBox();
                     
-                    // Если это редактирование, заполняем поля
                     if (!isNewRow) {
                         fillFields();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(EdStatDialog.this, 
-                        "Ошибка загрузки игроков: " + e.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+                        "РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё СЃРїРёСЃРєР° РёРіСЂРѕРєРѕРІ: " + e.getMessage(), "РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
                 } finally {
-                    // Разблокируем
                     cmbPerso.setEnabled(true);
                     btnOk.setEnabled(true);
                 }
@@ -131,7 +125,7 @@ public class EdStatDialog extends JRDialog {
     }
 
     private void fillFields() {
-        // Заполняем текстовые поля из объекта
+        // РЈСЃС‚Р°РЅРѕРІРєР° Р·РЅР°С‡РµРЅРёР№ РІ С‚РµРєСЃС‚РѕРІС‹Рµ РїРѕР»СЏ
         setTextOrEmpty(edAssistsoim, type.getAssists());
         setTextOrEmpty(ed2, type.getDoubleDouble());
         setTextOrEmpty(ed3, type.getTriple());
@@ -139,7 +133,7 @@ public class EdStatDialog extends JRDialog {
         
         if (type.getPlayer() != null) {
             edCod_perso.setText(String.valueOf(type.getPlayer().getId()));
-            // Выбираем игрока в ComboBox
+            // РџРѕРёСЃРє Рё РІС‹Р±РѕСЂ РёРіСЂРѕРєР° РІ ComboBox РїРѕ ID
             for (int i = 0; i < cmbPerso.getItemCount(); i++) {
                 Player item = cmbPerso.getItemAt(i);
                 if (item.getId().equals(type.getPlayer().getId())) {
@@ -158,13 +152,12 @@ public class EdStatDialog extends JRDialog {
         setTextOrEmpty(edOr, type.getOr());
     }
     
-    // Вспомогательный метод чтобы не писать .toString() везде
     private void setTextOrEmpty(JTextField field, Object value) {
         field.setText(value != null ? value.toString() : "");
     }
 
     private void bindListeners() {
-        // Обработка клавиш
+        // Р—Р°РєСЂС‹С‚РёРµ РѕРєРЅР° РїРѕ ESC
         setKeyListener(this, new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -172,12 +165,10 @@ public class EdStatDialog extends JRDialog {
                     setDialogResult(JDialogResult.Cancel);
                     close();
                     e.consume();
-                } else
-                    super.keyPressed(e);
+                }
             }
         });
         
-        // Закрытие окна
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -185,24 +176,19 @@ public class EdStatDialog extends JRDialog {
             }
         });
         
-        // Отмена
         btnCancel.addActionListener(e -> {
             setDialogResult(JDialogResult.Cancel);
             close();
         });
         
-        // OK (Сохранение)
         btnOk.addActionListener(e -> {
             if (!constructStat()) return;
-            
-            // ВАЖНО: Сам диалог не сохраняет в БД, он только готовит объект!
-            // Сохранение должно происходить в той форме, которая вызвала диалог (например, StatForm).
-            // Поэтому мы просто возвращаем OK.
+            // Р’РѕР·РІСЂР°С‰Р°РµРј СЂРµР·СѓР»СЊС‚Р°С‚ OK РІС‹Р·С‹РІР°СЋС‰РµР№ С„РѕСЂРјРµ
             setDialogResult(JDialogResult.OK);
             close();
         });
 
-        // Выбор игрока в списке -> обновление поля кода
+        // РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ ComboBox Рё С‚РµРєСЃС‚РѕРІРѕРіРѕ РїРѕР»СЏ СЃ ID РёРіСЂРѕРєР°
         cmbPerso.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED && e.getItem() != null) {
                 Player selected = (Player) e.getItem();
@@ -210,7 +196,6 @@ public class EdStatDialog extends JRDialog {
             }
         });
 
-        // Потеря фокуса полем кода -> выбор в списке
         edCod_perso.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
@@ -218,22 +203,18 @@ public class EdStatDialog extends JRDialog {
                 if (!text.isEmpty()) {
                     try {
                         Integer id = Integer.valueOf(text);
-                        // Ищем игрока по ID в списке
                         for (int i = 0; i < cmbPerso.getItemCount(); i++) {
                             if (cmbPerso.getItemAt(i).getId().equals(id)) {
                                 cmbPerso.setSelectedIndex(i);
                                 break;
                             }
                         }
-                    } catch (NumberFormatException ex) {
-                        // Невалидный ID, игнорируем
-                    }
+                    } catch (NumberFormatException ex) { }
                 }
             }
         });
     }
 
-    // Создание GUI
     private void createGui() {
         JPanel pnl = new JPanel(new MigLayout("insets 5", "[][]", "[]5[]10[]"));
         
@@ -251,44 +232,45 @@ public class EdStatDialog extends JRDialog {
         edOr = new JTextField(20);
         edFree = new JTextField(20);
 
-        btnOk = new JButton("Сохранить");
-        btnCancel = new JButton("Отмена");
+        btnOk = new JButton("РЎРѕС…СЂР°РЅРёС‚СЊ");
+        btnCancel = new JButton("РћС‚РјРµРЅР°");
 
-        pnl.add(new JLabel("Игрок"));
+        // Р”РѕР±Р°РІР»РµРЅРёРµ РєРѕРјРїРѕРЅРµРЅС‚РѕРІ РЅР° РїР°РЅРµР»СЊ
+        pnl.add(new JLabel("РРіСЂРѕРє"));
         pnl.add(edCod_perso, "split 2");
         pnl.add(cmbPerso, "growx, wrap");
         
-        pnl.add(new JLabel("Очков"));
+        pnl.add(new JLabel("РћС‡РєРѕРІ"));
         pnl.add(edpointscored, "span");
         
-        pnl.add(new JLabel("Кол-во ассистов"));
+        pnl.add(new JLabel("РљРѕР»-РІРѕ Р°СЃСЃРёСЃС‚РѕРІ"));
         pnl.add(edAssistsoim, "span");
         
-        pnl.add(new JLabel("Кол-во перехватов"));
+        pnl.add(new JLabel("РљРѕР»-РІРѕ РїРµСЂРµС…РІР°С‚РѕРІ"));
         pnl.add(edSteal, "span");
 
-        pnl.add(new JLabel("Кол-во потерь мяча"));
+        pnl.add(new JLabel("РљРѕР»-РІРѕ РїРѕС‚РµСЂСЊ РјСЏС‡Р°"));
         pnl.add(edTurnover, "span");
         
-        pnl.add(new JLabel("Кол-во блок-шотов"));
+        pnl.add(new JLabel("РљРѕР»-РІРѕ Р±Р»РѕРє-С€РѕС‚РѕРІ"));
         pnl.add(edBlockedshot, "span");
 
-        pnl.add(new JLabel("Кол-во фолов"));
+        pnl.add(new JLabel("РљРѕР»-РІРѕ С„РѕР»РѕРІ"));
         pnl.add(edFoull, "span");
 
-        pnl.add(new JLabel("Кол-во 2-х очковых"));
+        pnl.add(new JLabel("РљРѕР»-РІРѕ 2-С… РѕС‡РєРѕРІС‹С…"));
         pnl.add(ed2, "span");
 
-        pnl.add(new JLabel("Кол-во 3-х очковых"));
+        pnl.add(new JLabel("РљРѕР»-РІРѕ 3-С… РѕС‡РєРѕРІС‹С…"));
         pnl.add(ed3, "span");
 
-        pnl.add(new JLabel("Кол-во штрафных"));
+        pnl.add(new JLabel("РљРѕР»-РІРѕ С€С‚СЂР°С„РЅС‹С…"));
         pnl.add(edFree, "span");
         
-        pnl.add(new JLabel("Кол-во подборов на своем щите"));
+        pnl.add(new JLabel("РџРѕРґР±РѕСЂС‹ (Р·Р°С‰РёС‚Р°)"));
         pnl.add(edDr, "span");
         
-        pnl.add(new JLabel("Кол-во подборов на чужом щите"));
+        pnl.add(new JLabel("РџРѕРґР±РѕСЂС‹ (Р°С‚Р°РєР°)"));
         pnl.add(edOr, "span");
 
         pnl.add(btnOk, "span, split 2, center, sg ");
@@ -298,7 +280,6 @@ public class EdStatDialog extends JRDialog {
         getContentPane().add(pnl, BorderLayout.CENTER);
     }
 
-    // Собираем объект из полей ввода
     private boolean constructStat() {
         try {
             type.setIdMatch(fk_key);
@@ -314,23 +295,24 @@ public class EdStatDialog extends JRDialog {
             type.setDr(parseIntOrNull(edDr.getText()));
             type.setOr(parseIntOrNull(edOr.getText()));
 
-            Object selected = cmbPerso.getSelectedItem();
+            Player selected = (Player) cmbPerso.getSelectedItem();
             if (selected != null) {
-                type.setPlayer((Player) selected);
+                type.setPlayer(selected);
+                type.setIdPlayer(selected.getId());
             } else {
-                JOptionPane.showMessageDialog(this, "Выберите игрока!", "Ошибка", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РІС‹Р±РµСЂРёС‚Рµ РёРіСЂРѕРєР°!", "РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
 
             return true;
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Ошибка данных", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° С„РѕСЂРјР°С‚Р° РґР°РЅРЅС‹С…: " + ex.getMessage(), "РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
             return false;
         }
     }
     
     private Integer parseIntOrNull(String text) {
-        if (text == null || text.trim().isEmpty()) return null;
+        if (text == null || text.trim().isEmpty()) return 0;
         return Integer.parseInt(text.trim());
     }
 

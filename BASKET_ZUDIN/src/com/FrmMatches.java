@@ -17,12 +17,21 @@ public class FrmMatches extends javax.swing.JDialog {
     public FrmMatches(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        
+        // РЈСЃС‚Р°РЅРѕРІРєР° РёРјРµРЅ РґР»СЏ UI-С‚РµСЃС‚РѕРІ
+        tblMatches.setName("tblMatches");
+        btnAdd.setName("btnAdd");
+        btnEdit.setName("btnEdit");
+        btnDelete.setName("btnDelete");
+        btnClose.setName("btnClose");
+        lblStatus.setName("lblStatus");
+        
         this.setLocationRelativeTo(parent);
         loadMatchesAsync();
     }
 
     private void loadMatchesAsync() {
-        lblStatus.setText("Загрузка матчей с сервера...");
+        lblStatus.setText("Р—Р°РіСЂСѓР·РєР° РјР°С‚С‡РµР№ СЃ СЃРµСЂРІРµСЂР°...");
         btnAdd.setEnabled(false);
         btnEdit.setEnabled(false);
         btnDelete.setEnabled(false);
@@ -38,11 +47,11 @@ public class FrmMatches extends javax.swing.JDialog {
                 try {
                     currentMatches = get();
                     GuiHelper.addObjectsToTable(tblMatches, currentMatches);
-                    lblStatus.setText("Матчи успешно загружены.");
+                    lblStatus.setText("РњР°С‚С‡Рё СѓСЃРїРµС€РЅРѕ Р·Р°РіСЂСѓР¶РµРЅС‹.");
                 } catch (Exception e) {
                     e.printStackTrace();
-                    lblStatus.setText("Ошибка загрузки матчей!");
-                    JOptionPane.showMessageDialog(FrmMatches.this, "Ошибка загрузки: " + e.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                    lblStatus.setText("РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…!");
+                    JOptionPane.showMessageDialog(FrmMatches.this, "РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё: " + e.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
                 } finally {
                     btnAdd.setEnabled(true);
                     btnEdit.setEnabled(true);
@@ -54,7 +63,6 @@ public class FrmMatches extends javax.swing.JDialog {
     }
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {
-        // Предполагается, что EdMatchesDialog сам внутри себя загрузит все необходимые данные (команды, турниры)
         EdMatchesDialog dlg = new EdMatchesDialog(null, true, null);
         dlg.setVisible(true);
 
@@ -64,7 +72,7 @@ public class FrmMatches extends javax.swing.JDialog {
                 loadMatchesAsync();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка сохранения матча: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ РјР°С‚С‡Р°: " + ex.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -72,7 +80,7 @@ public class FrmMatches extends javax.swing.JDialog {
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {
         int selectedRow = tblMatches.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Выберите матч для редактирования.");
+            JOptionPane.showMessageDialog(this, "Р’С‹Р±РµСЂРёС‚Рµ РјР°С‚С‡ РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ.");
             return;
         }
 
@@ -87,7 +95,7 @@ public class FrmMatches extends javax.swing.JDialog {
                 loadMatchesAsync();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка сохранения матча: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ РјР°С‚С‡Р°: " + ex.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -95,18 +103,18 @@ public class FrmMatches extends javax.swing.JDialog {
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {
         int selectedRow = tblMatches.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Выберите матч для удаления.");
+            JOptionPane.showMessageDialog(this, "Р’С‹Р±РµСЂРёС‚Рµ РјР°С‚С‡ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ.");
             return;
         }
 
-        if (JOptionPane.showConfirmDialog(this, "Вы уверены, что хотите удалить выбранный матч?", "Подтверждение удаления", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+        if (JOptionPane.showConfirmDialog(this, "Р’С‹ СѓРІРµСЂРµРЅС‹, С‡С‚Рѕ С…РѕС‚РёС‚Рµ СѓРґР°Р»РёС‚СЊ РІС‹Р±СЂР°РЅРЅС‹Р№ РјР°С‚С‡?", "РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ СѓРґР°Р»РµРЅРёСЏ", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             Matches selectedMatch = currentMatches.get(selectedRow);
             try {
                 apiClient.deleteMatch(selectedMatch.getId());
                 loadMatchesAsync();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка удаления матча: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ: " + ex.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -128,28 +136,27 @@ public class FrmMatches extends javax.swing.JDialog {
         lblStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Матчи");
+        setTitle("РњР°С‚С‡Рё");
 
         tblMatches.setModel(new javax.swing.table.DefaultTableModel(
                 new Object [][] {},
-                // Заголовки для таблицы матчей
-                new String [] {"Дата", "Команда 1", "Счет 1", "Счет 2", "Команда 2", "Площадка"}
+                new String [] {"Р”Р°С‚Р°", "РљРѕРјР°РЅРґР° 1", "РЎС‡РµС‚ 1", "РЎС‡РµС‚ 2", "РљРѕРјР°РЅРґР° 2", "РџР»РѕС‰Р°РґРєР°"}
         ));
         jScrollPane1.setViewportView(tblMatches);
 
-        btnAdd.setText("Добавить");
+        btnAdd.setText("Р”РѕР±Р°РІРёС‚СЊ");
         btnAdd.addActionListener(evt -> btnAddActionPerformed(evt));
 
-        btnEdit.setText("Изменить");
+        btnEdit.setText("РР·РјРµРЅРёС‚СЊ");
         btnEdit.addActionListener(evt -> btnEditActionPerformed(evt));
 
-        btnDelete.setText("Удалить");
+        btnDelete.setText("РЈРґР°Р»РёС‚СЊ");
         btnDelete.addActionListener(evt -> btnDeleteActionPerformed(evt));
-
-        btnClose.setText("Закрыть");
+        
+        btnClose.setText("Р—Р°РєСЂС‹С‚СЊ");
         btnClose.addActionListener(evt -> btnCloseActionPerformed(evt));
 
-        lblStatus.setText("Статус");
+        lblStatus.setText("РЎС‚Р°С‚СѓСЃ");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -197,5 +204,4 @@ public class FrmMatches extends javax.swing.JDialog {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblMatches;
-    // End of variables declaration
 }

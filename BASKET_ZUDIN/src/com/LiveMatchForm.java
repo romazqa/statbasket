@@ -33,7 +33,6 @@ public class LiveMatchForm extends JFrame {
     private List<Player> activePlayersTeamB;
     private Player selectedPlayer = null;
     
-    // УДАЛЕНО: private Team selectedPlayerTeam; - это поле ненадежно
     private JButton selectedPlayerButton = null;
     private JTextArea eventsTextArea;
     
@@ -71,7 +70,7 @@ public class LiveMatchForm extends JFrame {
         
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(1320, 830);
-        setTitle("StatBasket - Ведение матча: " + match.getTeam1().getName() + " vs " + match.getTeam2().getName());
+        setTitle("StatBasket - Р’РµРґРµРЅРёРµ РјР°С‚С‡Р°: " + match.getTeam1().getName() + " vs " + match.getTeam2().getName());
         setLocationRelativeTo(null);
 
         this.scoreTeamA = match.getTeam1Score() != null ? match.getTeam1Score() : 0;
@@ -85,7 +84,6 @@ public class LiveMatchForm extends JFrame {
         updateScoreLabel();
     }
 
-    // ИЗМЕНЕН: Теперь проверка идет по отфильтрованному списку
     private boolean isPlayerInTeam1(Integer playerId) {
         for(Player p : activePlayersTeamA) {
             if(p.getId().equals(playerId)) return true;
@@ -105,34 +103,32 @@ public class LiveMatchForm extends JFrame {
                 g2d.dispose();
                 basketballIcon = new ImageIcon(transparentImage);
             } catch (IOException ex) {
-                System.err.println("Не удалось загрузить картинку basketball.png");
+                System.err.println("РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ РєР°СЂС‚РёРЅРєСѓ basketball.png");
             }
         }
     }
 
     private void createGUI() {
         setLayout(new GridBagLayout());
-        // ... (Код создания панелей остался тем же, для краткости не дублирую полностью стандартную разметку) ...
-        // ВАЖНО: Вставьте сюда код создания панелей из предыдущего ответа, 
-        // или если он у вас сохранился, оставьте как есть. 
-        // Главное изменение - в методе createStatButton ниже.
-        
-        // --- ВОССТАНОВЛЕНИЕ GUI (Кратко) ---
         GridBagConstraints gbc = new GridBagConstraints();
+
+        // Р›РµРІР°СЏ РїР°РЅРµР»СЊ - РєРѕРјР°РЅРґР° Рђ
         JPanel leftPanel = new JPanel(new GridBagLayout());
         GridBagConstraints leftGbc = new GridBagConstraints();
         for (int i = 0; i < 5; i++) {
-            playerButtonsA[i] = createPlayerButton("Игрок " + (i + 1), 110, 70);
+            playerButtonsA[i] = createPlayerButton("РРіСЂРѕРє " + (i + 1), 110, 70);
+            playerButtonsA[i].setName("playerBtnA" + i);
             leftGbc.gridx = 0; leftGbc.gridy = i; leftGbc.fill = GridBagConstraints.BOTH; leftGbc.weightx = 1.0;
             leftPanel.add(playerButtonsA[i], leftGbc);
         }
-        substitutionButtonA = createSubstitutionButton("Замена " + currentMatch.getTeam1().getName(), 150, 70);
+        substitutionButtonA = createSubstitutionButton("Р—Р°РјРµРЅР° " + currentMatch.getTeam1().getName(), 150, 70);
         leftGbc.gridy = 6; leftGbc.insets = new Insets(20, 0, 0, 0);
         leftPanel.add(substitutionButtonA, leftGbc);
 
+        // Р¦РµРЅС‚СЂР°Р»СЊРЅР°СЏ РїР°РЅРµР»СЊ
         JPanel middlePanel = new JPanel(new BorderLayout());
         JPanel scorePanel = new JPanel(new FlowLayout());
-        scoreLabel = new JLabel("Счет: 0 : 0");
+        scoreLabel = new JLabel("РЎС‡РµС‚: 0 : 0");
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 24));
         scorePanel.add(scoreLabel);
         middlePanel.add(scorePanel, BorderLayout.NORTH);
@@ -140,45 +136,59 @@ public class LiveMatchForm extends JFrame {
         eventsTextArea = new JTextArea(20, 30);
         eventsTextArea.setFont(new Font("Arial", Font.BOLD, 12));
         eventsTextArea.setEditable(false);
+        eventsTextArea.setName("eventsTextArea");
         middlePanel.add(new JScrollPane(eventsTextArea), BorderLayout.CENTER);
 
+        // РљРЅРѕРїРєРё СЃС‚Р°С‚РёСЃС‚РёРєРё
         JPanel statsPanel = new JPanel(new GridLayout(3, 2, 5, 5));
-        String[] buttonLabels = {"1 очко", "1 очко\nмимо", "2 очка", "2 очка\nмимо", "3 очка", "3 очка\nмимо"};
+        String[] buttonLabels = {"1 РѕС‡РєРѕ", "1 РѕС‡РєРѕ\nРјРёРјРѕ", "2 РѕС‡РєР°", "2 РѕС‡РєР°\nРјРёРјРѕ", "3 РѕС‡РєР°", "3 РѕС‡РєР°\nРјРёРјРѕ"};
         for (String label : buttonLabels) statsPanel.add(createStatButton(label, 90, 90));
         middlePanel.add(statsPanel, BorderLayout.WEST);
 
         JPanel extraButtonsPanel = new JPanel(new GridLayout(3, 2, 5, 5));
-        String[] extraButtonLabels = {"подбор\nв защите", "подбор\nв атаке", "блокшот", "фол", "ассист", "перехват"};
+        String[] extraButtonLabels = {"РїРѕРґР±РѕСЂ\nРІ Р·Р°С‰РёС‚Рµ", "РїРѕРґР±РѕСЂ\nРІ Р°С‚Р°РєРµ", "Р±Р»РѕРєС€РѕС‚", "С„РѕР»", "Р°СЃСЃРёСЃС‚", "РїРµСЂРµС…РІР°С‚"};
         for (String label : extraButtonLabels) extraButtonsPanel.add(createStatButton(label, 90, 90));
         middlePanel.add(extraButtonsPanel, BorderLayout.EAST);
 
+        // РџСЂР°РІР°СЏ РїР°РЅРµР»СЊ - РєРѕРјР°РЅРґР° Р‘
         JPanel rightPanel = new JPanel(new GridBagLayout());
         GridBagConstraints rightGbc = new GridBagConstraints();
         for (int i = 0; i < 5; i++) {
-            playerButtonsB[i] = createPlayerButton("Игрок " + (i + 1), 110, 70);
+            playerButtonsB[i] = createPlayerButton("РРіСЂРѕРє " + (i + 1), 110, 70);
+            playerButtonsB[i].setName("playerBtnB" + i);
             rightGbc.gridx = 0; rightGbc.gridy = i; rightGbc.fill = GridBagConstraints.BOTH; rightGbc.weightx = 1.0;
             rightPanel.add(playerButtonsB[i], rightGbc);
         }
-        substitutionButtonB = createSubstitutionButton("Замена " + currentMatch.getTeam2().getName(), 150, 70);
+        substitutionButtonB = createSubstitutionButton("Р—Р°РјРµРЅР° " + currentMatch.getTeam2().getName(), 150, 70);
         rightGbc.gridy = 6; rightGbc.insets = new Insets(20, 0, 0, 0);
         rightPanel.add(substitutionButtonB, rightGbc);
 
+        // РќРёР¶РЅСЏСЏ РїР°РЅРµР»СЊ СѓРїСЂР°РІР»РµРЅРёСЏ
         JPanel bottomPanel = new JPanel(new MigLayout("insets 5, flowy", "[grow][]", "[]5[]"));
         quarterComboBox = new JComboBox<>(new String[]{"1", "2", "3", "4"});
-        startQuarterButton = new JButton("Начать четверть");
-        endQuarterButton = new JButton("Завершить четверть");
-        finishMatchButton = new JButton("Завершить матч");
+        quarterComboBox.setName("quarterComboBox");
+        
+        startQuarterButton = new JButton("РќР°С‡Р°С‚СЊ С‡РµС‚РІРµСЂС‚СЊ");
+        startQuarterButton.setName("startQuarterButton");
+        endQuarterButton = new JButton("Р—Р°РІРµСЂС€РёС‚СЊ С‡РµС‚РІРµСЂС‚СЊ");
+        endQuarterButton.setName("endQuarterButton");
+        finishMatchButton = new JButton("Р—Р°РІРµСЂС€РёС‚СЊ РјР°С‚С‡");
+        finishMatchButton.setName("finishMatchButton");
+        
         quarterTimerLabel = new JLabel("10:00");
         quarterTimerLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        pauseTimerButton = new JButton("Пауза");
-        resumeTimerButton = new JButton("Продолжить");
+        
+        pauseTimerButton = new JButton("РџР°СѓР·Р°");
+        pauseTimerButton.setName("pauseTimerButton");
+        resumeTimerButton = new JButton("РџСЂРѕРґРѕР»Р¶РёС‚СЊ");
+        resumeTimerButton.setName("resumeTimerButton");
+        
         pauseTimerButton.setEnabled(false); resumeTimerButton.setEnabled(false);
 
-        // Цвета
         startQuarterButton.setBackground(new Color(102, 204, 102));
         finishMatchButton.setBackground(new Color(253, 51, 51));
 
-        bottomPanel.add(new JLabel("ЧЕТВЕРТЬ"), "cell 0 0, align center");
+        bottomPanel.add(new JLabel("Р§Р•РўР’Р•Р РўР¬"), "cell 0 0, align center");
         bottomPanel.add(quarterComboBox, "cell 0 1, width 60!, align center");
         bottomPanel.add(startQuarterButton, "cell 0 1, width 140!, growx 0, align center");
         bottomPanel.add(endQuarterButton, "cell 0 1, growx 0, align center");
@@ -196,28 +206,25 @@ public class LiveMatchForm extends JFrame {
         cgbc.gridx = 2; cgbc.weightx = 0.3;
         centralPanel.add(rightPanel, cgbc);
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 3; gbc.weightx = 1.0; gbc.weighty = 1.0; gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 3; gbc.weightx = 1.0; gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
         add(centralPanel, gbc); 
         gbc.gridy = 3; gbc.weighty = 0; gbc.fill = GridBagConstraints.HORIZONTAL;
         add(bottomPanel, gbc);
     }
 
-    // --- ИСПРАВЛЕННАЯ ЛОГИКА КНОПКИ ИГРОКА ---
     private JButton createPlayerButton(String text, int width, int height) {
         JButton button = new JButton("<html><center>" + text + "</center></html>");
         button.setPreferredSize(new Dimension(width, height));
         button.addActionListener(e -> {
             JButton btn = (JButton) e.getSource();
             String playerIdStr = btn.getActionCommand();
-            
             if (playerIdStr != null && !playerIdStr.isEmpty()) {
                 Integer playerId = Integer.valueOf(playerIdStr);
                 selectedPlayer = findPlayerInMatch(playerId);
-                
                 if (selectedPlayer != null) {
                     selectedPlayerButton = btn;
-                    updateEventsTextArea("Выбран игрок: " + selectedPlayer.getName());
-                    
+                    updateEventsTextArea("Р’С‹Р±СЂР°РЅ РёРіСЂРѕРє: " + selectedPlayer.getName());
                     if (basketballIcon != null) {
                         if (currentlySelectedPlayerButton != null) currentlySelectedPlayerButton.setIcon(null);
                         btn.setIcon(basketballIcon);
@@ -229,21 +236,20 @@ public class LiveMatchForm extends JFrame {
         return button;
     }
 
-    // --- ИСПРАВЛЕННАЯ ЛОГИКА КНОПКИ СТАТИСТИКИ ---
     private JButton createStatButton(String text, int width, int height) {
         JButton button = new JButton("<html><center>" + text.replace("\n", "<br>") + "</center></html>");
-        button.setPreferredSize(new Dimension(width, height)); 
+        button.setPreferredSize(new Dimension(width, height));
+        button.setName(text.replace("\n", " ").trim());
         button.addActionListener(e -> {
             if (selectedPlayer == null) {
-                JOptionPane.showMessageDialog(this, "Сначала выберите игрока!", "Внимание", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РЎРЅР°С‡Р°Р»Р° РІС‹Р±РµСЂРёС‚Рµ РёРіСЂРѕРєР°!", "Р’РЅРёРјР°РЅРёРµ", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             if (!quarterStarted) {
-                JOptionPane.showMessageDialog(this, "Сначала начните четверть!", "Внимание", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РЎРЅР°С‡Р°Р»Р° РЅР°С‡РЅРёС‚Рµ С‡РµС‚РІРµСЂС‚СЊ!", "Р’РЅРёРјР°РЅРёРµ", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // Получаем статистику из кэша или создаем новую
             Stat playerStats = playerStatsMap.computeIfAbsent(selectedPlayer.getId(), k -> {
                 Stat s = new Stat();
                 s.setPlayer(selectedPlayer);
@@ -252,63 +258,62 @@ public class LiveMatchForm extends JFrame {
                 return s;
             });
 
-            // ИСПРАВЛЕНО: Определяем команду надежным способом
             boolean isTeamA = isPlayerInTeam1(selectedPlayer.getId());
 
             switch (text) {
-                case "1 очко":
+                case "1 РѕС‡РєРѕ":
                     playerStats.setPointScored(getSafeInt(playerStats.getPointScored()) + 1);
                     playerStats.setFreeThrow(getSafeInt(playerStats.getFreeThrow()) + 1);
                     if (isTeamA) scoreTeamA++; else scoreTeamB++;
-                    updateEventsTextArea(selectedPlayer.getName() + ": +1 очко");
+                    updateEventsTextArea(selectedPlayer.getName() + ": +1 РѕС‡РєРѕ");
                     break;
-                case "1 очко\nмимо":
+                case "1 РѕС‡РєРѕ\nРјРёРјРѕ":
                     playerFreeThrowMisses.put(selectedPlayer.getId(), playerFreeThrowMisses.getOrDefault(selectedPlayer.getId(), 0) + 1);
-                    updateEventsTextArea(selectedPlayer.getName() + ": промах 1 очко");
+                    updateEventsTextArea(selectedPlayer.getName() + ": РїСЂРѕРјР°С… 1 РѕС‡РєРѕ");
                     break;
-                case "2 очка":
+                case "2 РѕС‡РєР°":
                     playerStats.setPointScored(getSafeInt(playerStats.getPointScored()) + 2);
                     playerStats.setDoubleDouble(getSafeInt(playerStats.getDoubleDouble()) + 1);
                     if (isTeamA) scoreTeamA += 2; else scoreTeamB += 2;
-                    updateEventsTextArea(selectedPlayer.getName() + ": +2 очка");
+                    updateEventsTextArea(selectedPlayer.getName() + ": +2 РѕС‡РєР°");
                     break;
-                case "2 очка\nмимо":
+                case "2 РѕС‡РєР°\nРјРёРјРѕ":
                     playerTwoPointMisses.put(selectedPlayer.getId(), playerTwoPointMisses.getOrDefault(selectedPlayer.getId(), 0) + 1);
-                    updateEventsTextArea(selectedPlayer.getName() + ": промах 2 очка");
+                    updateEventsTextArea(selectedPlayer.getName() + ": РїСЂРѕРјР°С… 2 РѕС‡РєР°");
                     break;
-                case "3 очка":
+                case "3 РѕС‡РєР°":
                     playerStats.setPointScored(getSafeInt(playerStats.getPointScored()) + 3);
                     playerStats.setTriple(getSafeInt(playerStats.getTriple()) + 1);
                     if (isTeamA) scoreTeamA += 3; else scoreTeamB += 3;
-                    updateEventsTextArea(selectedPlayer.getName() + ": +3 очка");
+                    updateEventsTextArea(selectedPlayer.getName() + ": +3 РѕС‡РєР°");
                     break;
-                case "3 очка\nмимо":
+                case "3 РѕС‡РєР°\nРјРёРјРѕ":
                     playerThreePointMisses.put(selectedPlayer.getId(), playerThreePointMisses.getOrDefault(selectedPlayer.getId(), 0) + 1);
-                    updateEventsTextArea(selectedPlayer.getName() + ": промах 3 очка");
+                    updateEventsTextArea(selectedPlayer.getName() + ": РїСЂРѕРјР°С… 3 РѕС‡РєР°");
                     break;
-                case "подбор\nв защите":
+                case "РїРѕРґР±РѕСЂ\nРІ Р·Р°С‰РёС‚Рµ":
                     playerStats.setDr(getSafeInt(playerStats.getDr()) + 1);
-                    updateEventsTextArea(selectedPlayer.getName() + ": подбор (защ)");
+                    updateEventsTextArea(selectedPlayer.getName() + ": РїРѕРґР±РѕСЂ (Р·Р°С‰)");
                     break;
-                case "подбор\nв атаке":
+                case "РїРѕРґР±РѕСЂ\nРІ Р°С‚Р°РєРµ":
                     playerStats.setOr(getSafeInt(playerStats.getOr()) + 1);
-                    updateEventsTextArea(selectedPlayer.getName() + ": подбор (атк)");
+                    updateEventsTextArea(selectedPlayer.getName() + ": РїРѕРґР±РѕСЂ (Р°С‚Рє)");
                     break;
-                case "блокшот":
+                case "Р±Р»РѕРєС€РѕС‚":
                     playerStats.setBlockedShot(getSafeInt(playerStats.getBlockedShot()) + 1);
-                    updateEventsTextArea(selectedPlayer.getName() + ": блокшот");
+                    updateEventsTextArea(selectedPlayer.getName() + ": Р±Р»РѕРєС€РѕС‚");
                     break;
-                case "фол":
+                case "С„РѕР»":
                     playerStats.setFoul(getSafeInt(playerStats.getFoul()) + 1);
-                    updateEventsTextArea(selectedPlayer.getName() + ": фол");
+                    updateEventsTextArea(selectedPlayer.getName() + ": С„РѕР»");
                     break;
-                case "ассист":
+                case "Р°СЃСЃРёСЃС‚":
                     playerStats.setAssists(getSafeInt(playerStats.getAssists()) + 1);
-                    updateEventsTextArea(selectedPlayer.getName() + ": ассист");
+                    updateEventsTextArea(selectedPlayer.getName() + ": Р°СЃСЃРёСЃС‚");
                     break;
-                case "перехват":
+                case "РїРµСЂРµС…РІР°С‚":
                     playerStats.setSteal(getSafeInt(playerStats.getSteal()) + 1);
-                    updateEventsTextArea(selectedPlayer.getName() + ": перехват");
+                    updateEventsTextArea(selectedPlayer.getName() + ": РїРµСЂРµС…РІР°С‚");
                     showOpponentPlayerDialog();
                     break;
             }
@@ -317,13 +322,11 @@ public class LiveMatchForm extends JFrame {
         return button;
     }
 
-    // --- ОСТАЛЬНЫЕ ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ---
-
     private int getSafeInt(Integer val) { return val == null ? 0 : val; }
 
     private Player findPlayerInMatch(Integer playerId) {
-        for (Player p : currentMatch.getTeam1().getPlayers()) if (p.getId().equals(playerId)) return p;
-        for (Player p : currentMatch.getTeam2().getPlayers()) if (p.getId().equals(playerId)) return p;
+        for (Player p : activePlayersTeamA) if (p.getId().equals(playerId)) return p;
+        for (Player p : activePlayersTeamB) if (p.getId().equals(playerId)) return p;
         return null;
     }
 
@@ -331,15 +334,14 @@ public class LiveMatchForm extends JFrame {
         if (currentMatch != null) {
             for (int i = 0; i < 5; i++) {
                 if (i < activePlayersTeamA.size()) {
-                    playerButtonsA[i].setText("<html><center>Игрок " + activePlayersTeamA.get(i).getGameNumber() + "<br>" + activePlayersTeamA.get(i).getName() + "</center></html>");
+                    playerButtonsA[i].setText("<html><center>РРіСЂРѕРє " + activePlayersTeamA.get(i).getGameNumber() + "<br>" + activePlayersTeamA.get(i).getName() + "</center></html>");
                     playerButtonsA[i].setActionCommand(activePlayersTeamA.get(i).getId().toString());
                 } else {
                     playerButtonsA[i].setText("...");
                     playerButtonsA[i].setActionCommand("");
                 }
-                
                 if (i < activePlayersTeamB.size()) {
-                    playerButtonsB[i].setText("<html><center>Игрок " + activePlayersTeamB.get(i).getGameNumber() + "<br>" + activePlayersTeamB.get(i).getName() + "</center></html>");
+                    playerButtonsB[i].setText("<html><center>РРіСЂРѕРє " + activePlayersTeamB.get(i).getGameNumber() + "<br>" + activePlayersTeamB.get(i).getName() + "</center></html>");
                     playerButtonsB[i].setActionCommand(activePlayersTeamB.get(i).getId().toString());
                 } else {
                     playerButtonsB[i].setText("...");
@@ -352,21 +354,17 @@ public class LiveMatchForm extends JFrame {
     private void showOpponentPlayerDialog() {
         boolean isSelectedTeamA = isPlayerInTeam1(selectedPlayer.getId());
         List<Player> opponentTeamPlayers = isSelectedTeamA ? activePlayersTeamB : activePlayersTeamA;
-        
-        // Фильтруем тех, кто на кнопках (на поле)
         JButton[] opponentButtons = isSelectedTeamA ? playerButtonsB : playerButtonsA;
-        DefaultListModel<Player> opponentPlayersModel = new DefaultListModel<>();
-        
+        DefaultListModel<Player> model = new DefaultListModel<>();
         for (int i = 0; i < 5; i++) {
             String pidStr = opponentButtons[i].getActionCommand();
             if (pidStr != null && !pidStr.isEmpty()) {
                 Integer pid = Integer.valueOf(pidStr);
-                opponentTeamPlayers.stream().filter(p -> p.getId().equals(pid)).findFirst().ifPresent(opponentPlayersModel::addElement);
+                opponentTeamPlayers.stream().filter(p -> p.getId().equals(pid)).findFirst().ifPresent(model::addElement);
             }
         }
-
-        JList<Player> list = new JList<>(opponentPlayersModel);
-        JDialog d = new JDialog(this, "Кто потерял мяч?", true);
+        JList<Player> list = new JList<>(model);
+        JDialog d = new JDialog(this, "РљС‚Рѕ РїРѕС‚РµСЂСЏР» РјСЏС‡?", true);
         d.add(new JScrollPane(list));
         JButton ok = new JButton("OK");
         ok.addActionListener(ev -> {
@@ -376,7 +374,7 @@ public class LiveMatchForm extends JFrame {
                     Stat stat = new Stat(); stat.setPlayer(opp); stat.setIdPlayer(opp.getId()); stat.setIdMatch(currentMatch.getId()); return stat;
                 });
                 s.setTurnover(getSafeInt(s.getTurnover()) + 1);
-                updateEventsTextArea(opp.getName() + ": потеря");
+                updateEventsTextArea(opp.getName() + ": РїРѕС‚РµСЂСЏ");
             }
             d.dispose();
         });
@@ -400,7 +398,7 @@ public class LiveMatchForm extends JFrame {
             if (selectedQuarter > currentQuarter && !quarterStarted) {
                 currentQuarter = selectedQuarter;
                 quarterStarted = true;
-                updateEventsTextArea("=== НАЧАЛО " + currentQuarter + " ЧЕТВЕРТИ ===");
+                updateEventsTextArea("=== РќРђР§РђР›Рћ " + currentQuarter + " Р§Р•РўР’Р•Р РўР ===");
                 startQuarterTimer();
                 resetQuarterTimer();
                 quarterTimer.start();
@@ -414,8 +412,7 @@ public class LiveMatchForm extends JFrame {
                 quarterScoresTeamA[currentQuarter - 1] = scoreTeamA;
                 quarterScoresTeamB[currentQuarter - 1] = scoreTeamB;
                 quarterStarted = false;
-                updateEventsTextArea("=== КОНЕЦ ЧЕТВЕРТИ. СЧЕТ: " + scoreTeamA + " : " + scoreTeamB + " ===");
-                // Обновляем время на площадке
+                updateEventsTextArea("=== РљРћРќР•Р¦ Р§Р•РўР’Р•Р РўР. РЎР§Р•Рў: " + scoreTeamA + " : " + scoreTeamB + " ===");
                 for (Map.Entry<Integer, Integer> entry : playerTimeOnCourt.entrySet()) {
                     playerTimeMap.put(entry.getKey(), playerTimeMap.getOrDefault(entry.getKey(), 0) + entry.getValue());
                 }
@@ -424,34 +421,26 @@ public class LiveMatchForm extends JFrame {
         });
 
         finishMatchButton.addActionListener(e -> {
-            // Разрешаем завершать после любой четверти для тестов, но лучше проверять currentQuarter == 4
-            int confirm = JOptionPane.showConfirmDialog(this, "Завершить матч и отправить данные на сервер?", "Завершение", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(this, "Р—Р°РІРµСЂС€РёС‚СЊ РјР°С‚С‡ Рё РѕС‚РїСЂР°РІРёС‚СЊ РґР°РЅРЅС‹Рµ РЅР° СЃРµСЂРІРµСЂ?", "Р—Р°РІРµСЂС€РµРЅРёРµ", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 if (quarterStarted) {
-                    JOptionPane.showMessageDialog(this, "Сначала завершите текущую четверть!");
+                    JOptionPane.showMessageDialog(this, "РЎРЅР°С‡Р°Р»Р° Р·Р°РІРµСЂС€РёС‚Рµ С‚РµРєСѓС‰СѓСЋ С‡РµС‚РІРµСЂС‚СЊ!");
                     return;
                 }
-                
                 currentMatch.setTeam1Score(scoreTeamA);
                 currentMatch.setTeam2Score(scoreTeamB);
                 currentMatch.setPlayerStats(new ArrayList<>(playerStatsMap.values()));
 
                 SwingWorker<Void, Void> worker = new SwingWorker<>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        apiClient.saveMatch(currentMatch);
-                        return null;
-                    }
-                    @Override
-                    protected void done() {
+                    @Override protected Void doInBackground() throws Exception { apiClient.saveMatch(currentMatch); return null; }
+                    @Override protected void done() {
                         try {
                             get();
-                            JOptionPane.showMessageDialog(LiveMatchForm.this, "Матч успешно сохранен!");
-                            createMatchReport(); // Показываем отчет
+                            JOptionPane.showMessageDialog(LiveMatchForm.this, "РњР°С‚С‡ СѓСЃРїРµС€РЅРѕ СЃРѕС…СЂР°РЅРµРЅ!");
+                            createMatchReport();
                             dispose();
                         } catch (Exception ex) {
-                            ex.printStackTrace();
-                            JOptionPane.showMessageDialog(LiveMatchForm.this, "Ошибка сохранения: " + ex.getMessage());
+                            JOptionPane.showMessageDialog(LiveMatchForm.this, "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: " + ex.getMessage());
                         }
                     }
                 };
@@ -463,7 +452,7 @@ public class LiveMatchForm extends JFrame {
             if (quarterStarted && !timerPaused) {
                 quarterTimer.stop();
                 timerPaused = true;
-                updateEventsTextArea("Таймер остановлен");
+                updateEventsTextArea("РўР°Р№РјРµСЂ РѕСЃС‚Р°РЅРѕРІР»РµРЅ");
                 resumeTimerButton.setEnabled(true);
                 pauseTimerButton.setEnabled(false); 
             }
@@ -473,7 +462,7 @@ public class LiveMatchForm extends JFrame {
             if (quarterStarted && timerPaused) {
                 quarterTimer.start();
                 timerPaused = false;
-                updateEventsTextArea("Таймер запущен");
+                updateEventsTextArea("РўР°Р№РјРµСЂ Р·Р°РїСѓС‰РµРЅ");
                 pauseTimerButton.setEnabled(true); 
                 resumeTimerButton.setEnabled(false);
             }
@@ -482,13 +471,11 @@ public class LiveMatchForm extends JFrame {
 
     private void handleSubstitution(Team team, JButton[] playerButtons) {
         if (selectedPlayerButton == null || !Arrays.asList(playerButtons).contains(selectedPlayerButton)) {
-            JOptionPane.showMessageDialog(this, "Выберите игрока на площадке (нажмите кнопку игрока), которого хотите заменить.", "Внимание", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Р’С‹Р±РµСЂРёС‚Рµ РёРіСЂРѕРєР° РЅР° РїР»РѕС‰Р°РґРєРµ РґР»СЏ Р·Р°РјРµРЅС‹.", "Р’РЅРёРјР°РЅРёРµ", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         List<Player> teamPlayers = team.getId().equals(currentMatch.getTeam1().getId()) ? activePlayersTeamA : activePlayersTeamB;
         List<Player> playersOnCourt = new ArrayList<>();
-        
         for (JButton button : playerButtons) {
             String pidStr = button.getActionCommand();
             if (pidStr != null && !pidStr.isEmpty()) {
@@ -496,32 +483,27 @@ public class LiveMatchForm extends JFrame {
                 teamPlayers.stream().filter(p -> p.getId().equals(pid)).findFirst().ifPresent(playersOnCourt::add);
             }
         }
-
         List<Player> availablePlayers = new ArrayList<>(teamPlayers);
         availablePlayers.removeAll(playersOnCourt);
-
         DefaultListModel<Player> model = new DefaultListModel<>();
         for(Player p : availablePlayers) model.addElement(p);
-        
         JList<Player> list = new JList<>(model);
-        JDialog d = new JDialog(this, "Замена", true);
+        JDialog d = new JDialog(this, "Р—Р°РјРµРЅР°", true);
         d.add(new JScrollPane(list));
         JButton ok = new JButton("OK");
         ok.addActionListener(ev -> {
             Player newP = list.getSelectedValue();
             if (newP != null) {
-                // Сохраняем время уходящего
                 if (selectedPlayer != null) {
                     int time = playerTimeOnCourt.getOrDefault(selectedPlayer.getId(), 0);
                     playerTimeMap.put(selectedPlayer.getId(), playerTimeMap.getOrDefault(selectedPlayer.getId(), 0) + time);
                     playerTimeOnCourt.remove(selectedPlayer.getId());
                 }
                 playerTimeOnCourt.put(newP.getId(), 0);
-
-                selectedPlayerButton.setText("<html><center>" + newP.getGameNumber() + "<br>" + newP.getName() + "</center></html>");
+                selectedPlayerButton.setText("<html><center>РРіСЂРѕРє " + newP.getGameNumber() + "<br>" + newP.getName() + "</center></html>");
                 selectedPlayerButton.setActionCommand(newP.getId().toString());
                 selectedPlayer = newP;
-                updateEventsTextArea("Замена: вышел " + newP.getName());
+                updateEventsTextArea("Р—Р°РјРµРЅР°: РІС‹С€РµР» " + newP.getName());
                 d.dispose();
             }
         });
@@ -546,7 +528,7 @@ public class LiveMatchForm extends JFrame {
                         playerTimeOnCourt.put(id, playerTimeOnCourt.getOrDefault(id, 0) + 1);
                     }
                 }
-                if (quarterTimeSeconds == 0) endQuarterButton.doClick(); 
+                if (quarterTimeSeconds <= 0) endQuarterButton.doClick(); 
             }
         });
         quarterTimer.start();
@@ -572,46 +554,45 @@ public class LiveMatchForm extends JFrame {
 
     private void updateScoreLabel() {
         if (currentMatch != null) {
-            scoreLabel.setText("Счет: " + currentMatch.getTeam1().getName() + " - " + scoreTeamA +
+            scoreLabel.setText("РЎС‡РµС‚: " + currentMatch.getTeam1().getName() + " - " + scoreTeamA +
                     " : " + scoreTeamB + " - " + currentMatch.getTeam2().getName());
         }
     }
-    
-    // --- ЛОГИКА ОТЧЕТОВ (Использует локальные данные) ---
+
     private void createMatchReport() {
-        JDialog reportDialog = new JDialog(this, "Отчет о матче", true);
+        JDialog reportDialog = new JDialog(this, "РћС‚С‡РµС‚ Рѕ РјР°С‚С‡Рµ", true);
         reportDialog.setLayout(new BorderLayout());
 
         JPanel matchInfoPanel = new JPanel(new MigLayout("insets 5, wrap 2", "[][grow]", ""));
-        matchInfoPanel.add(new JLabel("Матч:"));
+        matchInfoPanel.add(new JLabel("РњР°С‚С‡:"));
         matchInfoPanel.add(new JLabel(currentMatch.getTeam1().getName() + " - " + currentMatch.getTeam2().getName()));
-        matchInfoPanel.add(new JLabel("Счет:"));
+        matchInfoPanel.add(new JLabel("РЎС‡РµС‚:"));
         matchInfoPanel.add(new JLabel(scoreTeamA + " : " + scoreTeamB));
 
         for (int i = 0; i < 4; i++) {
-            matchInfoPanel.add(new JLabel("Четверть " + (i + 1) + ":"));
+            matchInfoPanel.add(new JLabel("Р§РµС‚РІРµСЂС‚СЊ " + (i + 1) + ":"));
             matchInfoPanel.add(new JLabel(quarterScoresTeamA[i] + " : " + quarterScoresTeamB[i]));
         }
         reportDialog.add(matchInfoPanel, BorderLayout.NORTH);
 
         JPanel teamsPanel = new JPanel(new GridLayout(1, 2)); 
         JPanel teamAPanel = new JPanel(new BorderLayout());
-        teamAPanel.add(new JLabel("Команда A: " + currentMatch.getTeam1().getName()), BorderLayout.NORTH);
+        teamAPanel.add(new JLabel("РљРѕРјР°РЅРґР° A: " + currentMatch.getTeam1().getName()), BorderLayout.NORTH);
         teamAPanel.add(new JScrollPane(createTeamTable(currentMatch.getTeam1())), BorderLayout.CENTER);
         teamsPanel.add(teamAPanel);
 
         JPanel teamBPanel = new JPanel(new BorderLayout());
-        teamBPanel.add(new JLabel("Команда B: " + currentMatch.getTeam2().getName()), BorderLayout.NORTH);
+        teamBPanel.add(new JLabel("РљРѕРјР°РЅРґР° B: " + currentMatch.getTeam2().getName()), BorderLayout.NORTH);
         teamBPanel.add(new JScrollPane(createTeamTable(currentMatch.getTeam2())), BorderLayout.CENTER);
         teamsPanel.add(teamBPanel);
 
         reportDialog.add(teamsPanel, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton saveButton = new JButton("Сохранить отчет");
+        JButton saveButton = new JButton("РЎРѕС…СЂР°РЅРёС‚СЊ РѕС‚С‡РµС‚");
         saveButton.addActionListener(e -> saveMatchReportToWordFile());
         buttonPanel.add(saveButton);
-        JButton closeButton = new JButton("Закрыть");
+        JButton closeButton = new JButton("Р—Р°РєСЂС‹С‚СЊ");
         closeButton.addActionListener(e -> reportDialog.dispose());
         buttonPanel.add(closeButton);
         reportDialog.add(buttonPanel, BorderLayout.SOUTH); 
@@ -623,33 +604,27 @@ public class LiveMatchForm extends JFrame {
 
     private JTable createTeamTable(Team team) {
         DefaultTableModel model = new DefaultTableModel();
-        String[] columns = {"Игрок", "СВ", "Очки", "2-очк", "3-очк", "ШБ", "СЩ", "ЧЩ", "ВС", "Ф", "Перехваты", "Потери"};
+        String[] columns = {"РРіСЂРѕРє", "РЎР’", "РћС‡РєРё", "2-РѕС‡Рє", "3-РѕС‡Рє", "РЁР‘", "РЎР©", "Р§Р©", "Р’РЎ", "Р¤", "РџРµСЂРµС…РІР°С‚С‹", "РџРѕС‚РµСЂРё"};
         for (String c : columns) model.addColumn(c);
 
         for (Player player : team.getPlayers()) {
-            Stat playerStats = playerStatsMap.get(player.getId());
+            Stat s = playerStatsMap.get(player.getId());
             String playingTime = "00:00";
-
-            if (playerStats != null) {
-                Integer pt = playerTimeMap.get(player.getId());
-                if (pt != null) playingTime = String.format("%02d:%02d", pt / 60, pt % 60);
-
-                int miss2 = playerTwoPointMisses.getOrDefault(player.getId(), 0);
-                int miss3 = playerThreePointMisses.getOrDefault(player.getId(), 0);
-                int missF = playerFreeThrowMisses.getOrDefault(player.getId(), 0);
-
-                int att2 = getSafeInt(playerStats.getDoubleDouble()) + miss2;
-                int att3 = getSafeInt(playerStats.getTriple()) + miss3;
-                int attF = getSafeInt(playerStats.getFreeThrow()) + missF;
+            if (s != null) {
+                Integer pt = playerTimeMap.getOrDefault(player.getId(), 0);
+                playingTime = String.format("%02d:%02d", pt / 60, pt % 60);
+                int att2 = getSafeInt(s.getDoubleDouble()) + playerTwoPointMisses.getOrDefault(player.getId(), 0);
+                int att3 = getSafeInt(s.getTriple()) + playerThreePointMisses.getOrDefault(player.getId(), 0);
+                int attF = getSafeInt(s.getFreeThrow()) + playerFreeThrowMisses.getOrDefault(player.getId(), 0);
 
                 model.addRow(new Object[]{
-                        player.getName(), playingTime, getSafeInt(playerStats.getPointScored()),
-                        getSafeInt(playerStats.getDoubleDouble()) + "/" + att2,
-                        getSafeInt(playerStats.getTriple()) + "/" + att3,
-                        getSafeInt(playerStats.getFreeThrow()) + "/" + attF,
-                        getSafeInt(playerStats.getDr()), getSafeInt(playerStats.getOr()),
-                        getSafeInt(playerStats.getDr()) + getSafeInt(playerStats.getOr()),
-                        getSafeInt(playerStats.getFoul()), getSafeInt(playerStats.getSteal()), getSafeInt(playerStats.getTurnover())  
+                    player.getName(), playingTime, getSafeInt(s.getPointScored()),
+                    getSafeInt(s.getDoubleDouble()) + "/" + att2,
+                    getSafeInt(s.getTriple()) + "/" + att3,
+                    getSafeInt(s.getFreeThrow()) + "/" + attF,
+                    getSafeInt(s.getDr()), getSafeInt(s.getOr()),
+                    getSafeInt(s.getDr()) + getSafeInt(s.getOr()),
+                    getSafeInt(s.getFoul()), getSafeInt(s.getSteal()), getSafeInt(s.getTurnover())
                 });
             } else {
                 model.addRow(new Object[]{player.getName(), playingTime, 0, "0/0", "0/0", "0/0", 0, 0, 0, 0, 0, 0});
@@ -660,28 +635,24 @@ public class LiveMatchForm extends JFrame {
 
     private void saveMatchReportToWordFile() {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Сохранить отчет о матче в Word");
+        fileChooser.setDialogTitle("РЎРѕС…СЂР°РЅРёС‚СЊ РѕС‚С‡РµС‚ Рѕ РјР°С‚С‡Рµ РІ Word");
         fileChooser.setSelectedFile(new java.io.File("match_report.docx"));
-
         if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             try (XWPFDocument document = new XWPFDocument();
                  FileOutputStream out = new FileOutputStream(fileChooser.getSelectedFile())) {
-
                 XWPFParagraph matchInfo = document.createParagraph();
                 matchInfo.setAlignment(ParagraphAlignment.CENTER);
                 XWPFRun run = matchInfo.createRun();
-                run.setText("Матч: " + currentMatch.getTeam1().getName() + " - " + currentMatch.getTeam2().getName());
+                run.setText("РњР°С‚С‡: " + currentMatch.getTeam1().getName() + " - " + currentMatch.getTeam2().getName());
                 run.addBreak();
-                run.setText("Счет: " + scoreTeamA + " : " + scoreTeamB);
+                run.setText("РЎС‡РµС‚: " + scoreTeamA + " : " + scoreTeamB);
                 run.addBreak();
-
                 writeTeamDataToWordTable(document, currentMatch.getTeam1());
                 writeTeamDataToWordTable(document, currentMatch.getTeam2());
-
                 document.write(out);
-                JOptionPane.showMessageDialog(this, "Отчет сохранен!");
+                JOptionPane.showMessageDialog(this, "РћС‚С‡РµС‚ СЃРѕС…СЂР°РЅРµРЅ!");
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "Ошибка сохранения отчета: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: " + ex.getMessage(), "РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -690,15 +661,13 @@ public class LiveMatchForm extends JFrame {
         XWPFParagraph tp = document.createParagraph();
         XWPFRun tr = tp.createRun();
         tr.setBold(true); 
-        tr.setText("Команда: " + team.getName()); 
-        
+        tr.setText("РљРѕРјР°РЅРґР°: " + team.getName()); 
         XWPFTable table = document.createTable();
         table.setWidth("100%");
         XWPFTableRow headerRow = table.getRow(0);
-        String[] cols = {"Игрок", "СВ", "Очки", "2-очк", "3-очк", "ШБ", "СЩ", "ЧЩ", "ВС", "Ф", "Перехваты", "Потери"};
+        String[] cols = {"РРіСЂРѕРє", "РЎР’", "РћС‡РєРё", "2-РѕС‡Рє", "3-РѕС‡Рє", "РЁР‘", "РЎР©", "Р§Р©", "Р’РЎ", "Р¤", "РџРµСЂРµС…РІР°С‚С‹", "РџРѕС‚РµСЂРё"};
         headerRow.getCell(0).setText(cols[0]);
         for(int i=1; i<cols.length; i++) headerRow.addNewTableCell().setText(cols[i]);
-
         for (Player player : team.getPlayers()) {
             Stat s = playerStatsMap.get(player.getId());
             XWPFTableRow row = table.createRow();
@@ -707,7 +676,6 @@ public class LiveMatchForm extends JFrame {
                 int att2 = getSafeInt(s.getDoubleDouble()) + playerTwoPointMisses.getOrDefault(player.getId(), 0);
                 int att3 = getSafeInt(s.getTriple()) + playerThreePointMisses.getOrDefault(player.getId(), 0);
                 int attF = getSafeInt(s.getFreeThrow()) + playerFreeThrowMisses.getOrDefault(player.getId(), 0);
-
                 row.getCell(0).setText(player.getName());
                 row.getCell(1).setText(String.format("%02d:%02d", pt / 60, pt % 60));
                 row.getCell(2).setText(String.valueOf(getSafeInt(s.getPointScored())));

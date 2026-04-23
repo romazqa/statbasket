@@ -5,14 +5,13 @@ import com.data.Team;
 import com.gui.GuiHelper;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public class FrmPlayer extends javax.swing.JDialog {
 
     private final ApiClient apiClient = new ApiClient();
     private List<Player> currentPlayers;
-    private List<Team> allTeams; // Команды необходимы для диалога добавления/редактирования игрока
+    private List<Team> allTeams; // РљРѕРјР°РЅРґС‹ РЅРµРѕР±С…РѕРґРёРјС‹ РґР»СЏ РґРёР°Р»РѕРіР° РґРѕР±Р°РІР»РµРЅРёСЏ/СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ РёРіСЂРѕРєР°
 
     /**
      * Creates new form FrmPlayer
@@ -20,21 +19,30 @@ public class FrmPlayer extends javax.swing.JDialog {
     public FrmPlayer(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        
+        // РЈСЃС‚Р°РЅРѕРІРєР° РёРјРµРЅ РґР»СЏ UI-С‚РµСЃС‚РѕРІ
+        tblPlayer.setName("tblPlayer");
+        btnAdd.setName("btnAdd");
+        btnEdit.setName("btnEdit");
+        btnDelete.setName("btnDelete");
+        btnClose.setName("btnClose");
+        lblStatus.setName("lblStatus");
+        
         this.setLocationRelativeTo(parent);
         loadDataAsync();
     }
 
     private void loadDataAsync() {
-        lblStatus.setText("Загрузка данных с сервера...");
-        // Блокируем кнопки на время загрузки
+        lblStatus.setText("Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С… СЃ СЃРµСЂРІРµСЂР°...");
+        // Р‘Р»РѕРєРёСЂСѓРµРј РєРЅРѕРїРєРё РЅР° РІСЂРµРјСЏ Р·Р°РіСЂСѓР·РєРё
         btnAdd.setEnabled(false);
         btnEdit.setEnabled(false);
         btnDelete.setEnabled(false);
 
-        SwingWorker<List<Player>, Void> worker = new SwingWorker<>() {
+        SwingWorker<List<Player>, Void> worker = new SwingWorker<List<Player>, Void>() {
             @Override
             protected List<Player> doInBackground() throws Exception {
-                // В фоновом потоке загружаем и команды, и игроков
+                // Р’ С„РѕРЅРѕРІРѕРј РїРѕС‚РѕРєРµ Р·Р°РіСЂСѓР¶Р°РµРј Рё РєРѕРјР°РЅРґС‹, Рё РёРіСЂРѕРєРѕРІ
                 allTeams = apiClient.getAllTeams();
                 return apiClient.getAllPlayers();
             }
@@ -44,13 +52,13 @@ public class FrmPlayer extends javax.swing.JDialog {
                 try {
                     currentPlayers = get();
                     GuiHelper.addObjectsToTable(tblPlayer, currentPlayers);
-                    lblStatus.setText("Данные успешно загружены.");
+                    lblStatus.setText("Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ Р·Р°РіСЂСѓР¶РµРЅС‹.");
                 } catch (Exception e) {
                     e.printStackTrace();
-                    lblStatus.setText("Ошибка загрузки данных!");
-                    JOptionPane.showMessageDialog(FrmPlayer.this, "Ошибка загрузки: " + e.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                    lblStatus.setText("РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…!");
+                    JOptionPane.showMessageDialog(FrmPlayer.this, "РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё: " + e.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
                 } finally {
-                    // Разблокируем кнопки
+                    // Р Р°Р·Р±Р»РѕРєРёСЂСѓРµРј РєРЅРѕРїРєРё
                     btnAdd.setEnabled(true);
                     btnEdit.setEnabled(true);
                     btnDelete.setEnabled(true);
@@ -62,7 +70,7 @@ public class FrmPlayer extends javax.swing.JDialog {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {
         if (allTeams == null || allTeams.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Данные команд еще не загружены или отсутствуют. Невозможно добавить игрока.");
+            JOptionPane.showMessageDialog(this, "Р”Р°РЅРЅС‹Рµ РєРѕРјР°РЅРґ РµС‰Рµ РЅРµ Р·Р°РіСЂСѓР¶РµРЅС‹ РёР»Рё РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‚. РќРµРІРѕР·РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ РёРіСЂРѕРєР°.");
             return;
         }
 
@@ -72,10 +80,10 @@ public class FrmPlayer extends javax.swing.JDialog {
         if (dlg.getDialogResult() == JDialogResult.OK) {
             try {
                 apiClient.savePlayer(dlg.getPlayer());
-                loadDataAsync(); // Обновляем список после добавления
+                loadDataAsync(); // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РїРѕСЃР»Рµ РґРѕР±Р°РІР»РµРЅРёСЏ
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка сохранения игрока: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ РёРіСЂРѕРєР°: " + ex.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -83,11 +91,11 @@ public class FrmPlayer extends javax.swing.JDialog {
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {
         int selectedRow = tblPlayer.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Выберите игрока для редактирования.");
+            JOptionPane.showMessageDialog(this, "Р’С‹Р±РµСЂРёС‚Рµ РёРіСЂРѕРєР° РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ.");
             return;
         }
         if (allTeams == null || allTeams.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Данные команд еще не загружены. Невозможно редактировать игрока.");
+            JOptionPane.showMessageDialog(this, "Р”Р°РЅРЅС‹Рµ РєРѕРјР°РЅРґ РµС‰Рµ РЅРµ Р·Р°РіСЂСѓР¶РµРЅС‹. РќРµРІРѕР·РјРѕР¶РЅРѕ СЂРµРґР°РєС‚РёСЂРѕРІР°С‚СЊ РёРіСЂРѕРєР°.");
             return;
         }
 
@@ -99,10 +107,10 @@ public class FrmPlayer extends javax.swing.JDialog {
         if (dlg.getDialogResult() == JDialogResult.OK) {
             try {
                 apiClient.savePlayer(dlg.getPlayer());
-                loadDataAsync(); // Обновляем список после редактирования
+                loadDataAsync(); // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РїРѕСЃР»Рµ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка сохранения игрока: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ РёРіСЂРѕРєР°: " + ex.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -110,18 +118,18 @@ public class FrmPlayer extends javax.swing.JDialog {
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {
         int selectedRow = tblPlayer.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Выберите игрока для удаления.");
+            JOptionPane.showMessageDialog(this, "Р’С‹Р±РµСЂРёС‚Рµ РёРіСЂРѕРєР° РґР»СЏ СѓРґР°Р»РµРЅРёСЏ.");
             return;
         }
 
-        if (JOptionPane.showConfirmDialog(this, "Вы уверены, что хотите удалить выбранного игрока?", "Подтверждение удаления", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+        if (JOptionPane.showConfirmDialog(this, "Р’С‹ СѓРІРµСЂРµРЅС‹, С‡С‚Рѕ С…РѕС‚РёС‚Рµ СѓРґР°Р»РёС‚СЊ РІС‹Р±СЂР°РЅРЅРѕРіРѕ РёРіСЂРѕРєР°?", "РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ СѓРґР°Р»РµРЅРёСЏ", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             Player selectedPlayer = currentPlayers.get(selectedRow);
             try {
-            	apiClient.deletePlayer(selectedPlayer.getId().intValue());
-                loadDataAsync(); // Обновляем список после удаления
+                apiClient.deletePlayer(selectedPlayer.getId());
+                loadDataAsync(); // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка удаления игрока: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РёРіСЂРѕРєР°: " + ex.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -143,28 +151,27 @@ public class FrmPlayer extends javax.swing.JDialog {
         lblStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Игроки");
+        setTitle("РРіСЂРѕРєРё");
 
         tblPlayer.setModel(new javax.swing.table.DefaultTableModel(
                 new Object [][] {},
-                // Эти заголовки должны соответствовать методам get в модели Player и вашему GuiHelper
-                new String [] {"ФИО", "Команда", "Номер", "Рост", "Вес"}
+                new String [] {"Р¤РРћ", "РљРѕРјР°РЅРґР°", "РќРѕРјРµСЂ", "Р РѕСЃС‚", "Р’РµСЃ"}
         ));
         jScrollPane1.setViewportView(tblPlayer);
 
-        btnAdd.setText("Добавить");
+        btnAdd.setText("Р”РѕР±Р°РІРёС‚СЊ");
         btnAdd.addActionListener(evt -> btnAddActionPerformed(evt));
 
-        btnEdit.setText("Изменить");
+        btnEdit.setText("РР·РјРµРЅРёС‚СЊ");
         btnEdit.addActionListener(evt -> btnEditActionPerformed(evt));
 
-        btnDelete.setText("Удалить");
+        btnDelete.setText("РЈРґР°Р»РёС‚СЊ");
         btnDelete.addActionListener(evt -> btnDeleteActionPerformed(evt));
         
-        btnClose.setText("Закрыть");
+        btnClose.setText("Р—Р°РєСЂС‹С‚СЊ");
         btnClose.addActionListener(evt -> btnCloseActionPerformed(evt));
 
-        lblStatus.setText("Статус");
+        lblStatus.setText("РЎС‚Р°С‚СѓСЃ");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -213,5 +220,4 @@ public class FrmPlayer extends javax.swing.JDialog {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblPlayer;
-    // End of variables declaration
 }

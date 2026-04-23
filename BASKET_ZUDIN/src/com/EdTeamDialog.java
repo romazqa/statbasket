@@ -11,14 +11,20 @@ public class EdTeamDialog extends javax.swing.JDialog {
     public EdTeamDialog(java.awt.Frame parent, boolean modal, Team team) {
         super(parent, modal);
         initComponents();
+        
+        // Ð£ÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ° Ð¸Ð¼ÐµÐ½ ÐºÐ¾Ð¼Ð¿Ð¾Ð½ÐµÐ½Ñ‚Ð¾Ð² Ð´Ð»Ñ Ñ€Ð¾Ð±Ð¾Ñ‚Ð°-Ñ‚ÐµÑÑ‚Ð¸Ñ€Ð¾Ð²Ñ‰Ð¸ÐºÐ°
+        tfTeamName.setName("tfTeamName");
+        tfCity.setName("tfCity");
+        tfGender.setName("tfGender");
+        
         this.setLocationRelativeTo(parent);
 
         if (team == null) {
             this.team = new Team();
-            setTitle("Äîáàâëåíèå íîâîé êîìàíäû");
+            setTitle("Ð”Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Ð½Ð¾Ð²Ð¾Ð¹ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹");
         } else {
             this.team = team;
-            setTitle("Ðåäàêòèðîâàíèå êîìàíäû");
+            setTitle("Ð ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹");
             fillFields();
         }
     }
@@ -40,7 +46,7 @@ public class EdTeamDialog extends javax.swing.JDialog {
     private boolean checkAndSave() {
         String teamName = tfTeamName.getText();
         if (teamName == null || teamName.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Íàçâàíèå êîìàíäû íå ìîæåò áûòü ïóñòûì.", "Îøèáêà", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹ Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ð¿ÑƒÑÑ‚Ñ‹Ð¼.", "ÐžÑˆÐ¸Ð±ÐºÐ°", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         team.setName(teamName);
@@ -76,14 +82,14 @@ public class EdTeamDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jLabel1.setText("Íàçâàíèå êîìàíäû:");
-        jLabel2.setText("Ãîðîä:");
-        jLabel3.setText("Ïîë (Ì/Æ):");
+        jLabel1.setText("ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹:");
+        jLabel2.setText("Ð“Ð¾Ñ€Ð¾Ð´:");
+        jLabel3.setText("ÐŸÐ¾Ð» (Ðœ/Ð–):");
 
         btnOk.setText("OK");
         btnOk.addActionListener(evt -> btnOkActionPerformed(evt));
 
-        btnCancel.setText("Îòìåíà");
+        btnCancel.setText("ÐžÑ‚Ð¼ÐµÐ½Ð°");
         btnCancel.addActionListener(evt -> btnCancelActionPerformed(evt));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

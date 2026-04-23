@@ -15,19 +15,31 @@ public class EdMatchesDialog extends javax.swing.JDialog {
     private Matches match;
     private final ApiClient apiClient = new ApiClient();
     
-    // Списки для хранения загруженных данных
+    // РЎРїРёСЃРєРё РґР»СЏ С…СЂР°РЅРµРЅРёСЏ Р·Р°РіСЂСѓР¶РµРЅРЅС‹С… РґР°РЅРЅС‹С…
     private List<Team> teamList;
     private List<Event> eventList;
 
     /**
-     * Новый конструктор без DBManager
+     * РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РґРёР°Р»РѕРіР° СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ РјР°С‚С‡Р°
      */
     public EdMatchesDialog(java.awt.Frame parent, boolean modal, Matches match) {
         super(parent, modal);
         initComponents();
+        
+        // РЈСЃС‚Р°РЅРѕРІРєР° РёРјРµРЅ РґР»СЏ UI-С‚РµСЃС‚РѕРІ
+        tfDate.setName("tfDate");
+        cbEvent.setName("cbEvent");
+        cbTeam1.setName("cbTeam1");
+        tfScore1.setName("tfScore1");
+        cbTeam2.setName("cbTeam2");
+        tfScore2.setName("tfScore2");
+        tfPlayground.setName("tfPlayground");
+        btnOk.setName("btnOk");
+        btnCancel.setName("btnCancel");
+
         this.setLocationRelativeTo(parent);
 
-        // Блокируем списки и кнопку OK до окончания загрузки данных
+        // Р‘Р»РѕРєРёСЂСѓРµРј РёРЅС‚РµСЂС„РµР№СЃ РґРѕ РѕРєРѕРЅС‡Р°РЅРёСЏ Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
         btnOk.setEnabled(false);
         cbTeam1.setEnabled(false);
         cbTeam2.setEnabled(false);
@@ -36,15 +48,14 @@ public class EdMatchesDialog extends javax.swing.JDialog {
         this.match = match;
         if (this.match == null) {
             this.match = new Matches();
-            setTitle("Добавление нового матча");
-            // Инициализируем счет нулями для нового матча
+            setTitle("Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕРіРѕ РјР°С‚С‡Р°");
             tfScore1.setText("0");
             tfScore2.setText("0");
         } else {
-            setTitle("Редактирование матча");
+            setTitle("Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РјР°С‚С‡Р°");
         }
 
-        // Запускаем асинхронную загрузку справочников (Команды и Турниры)
+        // РђСЃРёРЅС…СЂРѕРЅРЅР°СЏ Р·Р°РіСЂСѓР·РєР° СЃРїСЂР°РІРѕС‡РЅРёРєРѕРІ
         loadDictionariesAsync();
     }
 
@@ -60,7 +71,6 @@ public class EdMatchesDialog extends javax.swing.JDialog {
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() throws Exception {
-                // Загружаем оба списка параллельно в фоне
                 teamList = apiClient.getAllTeams();
                 eventList = apiClient.getAllEvents();
                 return null;
@@ -69,17 +79,16 @@ public class EdMatchesDialog extends javax.swing.JDialog {
             @Override
             protected void done() {
                 try {
-                    get(); // Проверяем на ошибки во время загрузки
+                    get(); 
                     populateComboBoxes();
-                    if (match.getId() != null) { // Если это редактирование, заполняем поля
+                    if (match.getId() != null) {
                         fillFields();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(EdMatchesDialog.this, 
-                        "Ошибка загрузки справочников: " + e.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+                        "РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё СЃРїСЂР°РІРѕС‡РЅРёРєРѕРІ: " + e.getMessage(), "РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
                 } finally {
-                    // Разблокируем интерфейс
                     btnOk.setEnabled(true);
                     cbTeam1.setEnabled(true);
                     cbTeam2.setEnabled(true);
@@ -116,7 +125,6 @@ public class EdMatchesDialog extends javax.swing.JDialog {
         tfScore2.setText(String.valueOf(match.getTeam2Score()));
         tfPlayground.setText(match.getPlayground());
 
-        // Установка выбранного турнира
         if (match.getEvent() != null && eventList != null) {
             for (int i = 0; i < eventList.size(); i++) {
                 if (eventList.get(i).getId().equals(match.getEvent().getId())) {
@@ -126,7 +134,6 @@ public class EdMatchesDialog extends javax.swing.JDialog {
             }
         }
 
-        // Установка выбранной Команды 1
         if (match.getTeam1() != null && teamList != null) {
             for (int i = 0; i < teamList.size(); i++) {
                 if (teamList.get(i).getId().equals(match.getTeam1().getId())) {
@@ -136,7 +143,6 @@ public class EdMatchesDialog extends javax.swing.JDialog {
             }
         }
 
-        // Установка выбранной Команды 2
         if (match.getTeam2() != null && teamList != null) {
             for (int i = 0; i < teamList.size(); i++) {
                 if (teamList.get(i).getId().equals(match.getTeam2().getId())) {
@@ -148,47 +154,42 @@ public class EdMatchesDialog extends javax.swing.JDialog {
     }
 
     private boolean checkAndSave() {
-        // 1. Проверка даты
         String dateStr = tfDate.getText().trim();
         if (dateStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Введите дату матча!", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Р’РІРµРґРёС‚Рµ РґР°С‚Сѓ РјР°С‚С‡Р°!", "РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         try {
             match.setDate(LocalDate.parse(dateStr));
         } catch (DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "Неверный формат даты! Используйте ГГГГ-ММ-ДД.", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "РќРµРІРµСЂРЅС‹Р№ С„РѕСЂРјР°С‚ РґР°С‚С‹! РСЃРїРѕР»СЊР·СѓР№С‚Рµ Р“Р“Р“Р“-РњРњ-Р”Р”.", "РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
             return false;
         }
 
-        // 2. Проверка площадки
         match.setPlayground(tfPlayground.getText());
 
-        // 3. Проверка счета
         try {
             match.setTeam1Score(Integer.parseInt(tfScore1.getText().trim()));
             match.setTeam2Score(Integer.parseInt(tfScore2.getText().trim()));
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Счет должен быть целым числом!", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "РЎС‡РµС‚ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ С†РµР»С‹Рј С‡РёСЃР»РѕРј!", "РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
             return false;
         }
 
-        // 4. Проверка комбобоксов
         int idxEvent = cbEvent.getSelectedIndex();
         int idxTeam1 = cbTeam1.getSelectedIndex();
         int idxTeam2 = cbTeam2.getSelectedIndex();
 
         if (idxEvent == -1 || idxTeam1 == -1 || idxTeam2 == -1) {
-            JOptionPane.showMessageDialog(this, "Необходимо выбрать турнир и обе команды!", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "РќРµРѕР±С…РѕРґРёРјРѕ РІС‹Р±СЂР°С‚СЊ С‚СѓСЂРЅРёСЂ Рё РѕР±Рµ РєРѕРјР°РЅРґС‹!", "РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
             return false;
         }
 
         if (idxTeam1 == idxTeam2) {
-            JOptionPane.showMessageDialog(this, "Команда 1 и Команда 2 не могут быть одинаковыми!", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "РљРѕРјР°РЅРґР° 1 Рё РљРѕРјР°РЅРґР° 2 РЅРµ РјРѕРіСѓС‚ Р±С‹С‚СЊ РѕРґРёРЅР°РєРѕРІС‹РјРё!", "РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
             return false;
         }
 
-        // 5. Сохранение объектов в match
         match.setEvent(eventList.get(idxEvent));
         match.setTeam1(teamList.get(idxTeam1));
         match.setTeam2(teamList.get(idxTeam2));
@@ -231,18 +232,18 @@ public class EdMatchesDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jLabel1.setText("Дата (ГГГГ-ММ-ДД):");
-        jLabel2.setText("Соревнование:");
-        jLabel3.setText("Команда 1:");
-        jLabel4.setText("Счет 1:");
-        jLabel5.setText("Команда 2:");
-        jLabel6.setText("Счет 2:");
-        jLabel7.setText("Площадка:");
+        jLabel1.setText("Р”Р°С‚Р° (Р“Р“Р“Р“-РњРњ-Р”Р”):");
+        jLabel2.setText("РЎРѕСЂРµРІРЅРѕРІР°РЅРёРµ:");
+        jLabel3.setText("РљРѕРјР°РЅРґР° 1:");
+        jLabel4.setText("РЎС‡РµС‚ 1:");
+        jLabel5.setText("РљРѕРјР°РЅРґР° 2:");
+        jLabel6.setText("РЎС‡РµС‚ 2:");
+        jLabel7.setText("РџР»РѕС‰Р°РґРєР°:");
 
         btnOk.setText("OK");
         btnOk.addActionListener(evt -> btnOkActionPerformed(evt));
 
-        btnCancel.setText("Отмена");
+        btnCancel.setText("РћС‚РјРµРЅР°");
         btnCancel.addActionListener(evt -> btnCancelActionPerformed(evt));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -318,7 +319,6 @@ public class EdMatchesDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>
 
-    // Variables declaration - do not modify
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnOk;
     private javax.swing.JComboBox<String> cbEvent;
@@ -335,5 +335,4 @@ public class EdMatchesDialog extends javax.swing.JDialog {
     private javax.swing.JTextField tfPlayground;
     private javax.swing.JTextField tfScore1;
     private javax.swing.JTextField tfScore2;
-    // End of variables declaration
 }

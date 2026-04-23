@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: ui_tests.Module3_LiveMatchUITest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 18.44 s -- in ui_tests.Module3_LiveMatchUITest

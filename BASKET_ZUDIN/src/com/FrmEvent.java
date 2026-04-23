@@ -17,12 +17,21 @@ public class FrmEvent extends javax.swing.JDialog {
     public FrmEvent(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        
+        // РЈСЃС‚Р°РЅРѕРІРєР° РёРјРµРЅ РґР»СЏ UI-С‚РµСЃС‚РѕРІ
+        tblEvent.setName("tblEvent");
+        btnAdd.setName("btnAdd");
+        btnEdit.setName("btnEdit");
+        btnDelete.setName("btnDelete");
+        btnClose.setName("btnClose");
+        lblStatus.setName("lblStatus");
+        
         this.setLocationRelativeTo(parent);
         loadEventsAsync();
     }
 
     private void loadEventsAsync() {
-        lblStatus.setText("Загрузка соревнований...");
+        lblStatus.setText("Р—Р°РіСЂСѓР·РєР° СЃРѕСЂРµРІРЅРѕРІР°РЅРёР№...");
         btnAdd.setEnabled(false);
         btnEdit.setEnabled(false);
         btnDelete.setEnabled(false);
@@ -38,11 +47,11 @@ public class FrmEvent extends javax.swing.JDialog {
                 try {
                     currentEvents = get();
                     GuiHelper.addObjectsToTable(tblEvent, currentEvents);
-                    lblStatus.setText("Соревнования успешно загружены.");
+                    lblStatus.setText("РЎРѕСЂРµРІРЅРѕРІР°РЅРёСЏ СѓСЃРїРµС€РЅРѕ Р·Р°РіСЂСѓР¶РµРЅС‹.");
                 } catch (Exception e) {
                     e.printStackTrace();
-                    lblStatus.setText("Ошибка загрузки!");
-                    JOptionPane.showMessageDialog(FrmEvent.this, "Ошибка загрузки: " + e.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                    lblStatus.setText("РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё!");
+                    JOptionPane.showMessageDialog(FrmEvent.this, "РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё: " + e.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
                 } finally {
                     btnAdd.setEnabled(true);
                     btnEdit.setEnabled(true);
@@ -62,7 +71,7 @@ public class FrmEvent extends javax.swing.JDialog {
                 loadEventsAsync();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка сохранения: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: " + ex.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -70,7 +79,7 @@ public class FrmEvent extends javax.swing.JDialog {
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {
         int selectedRow = tblEvent.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Выберите соревнование для редактирования.");
+            JOptionPane.showMessageDialog(this, "Р’С‹Р±РµСЂРёС‚Рµ СЃРѕСЂРµРІРЅРѕРІР°РЅРёРµ РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ.");
             return;
         }
 
@@ -83,7 +92,7 @@ public class FrmEvent extends javax.swing.JDialog {
                 loadEventsAsync();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка сохранения: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: " + ex.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -91,18 +100,18 @@ public class FrmEvent extends javax.swing.JDialog {
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {
         int selectedRow = tblEvent.getSelectedRow();
         if (selectedRow == -1) {
-             JOptionPane.showMessageDialog(this, "Выберите соревнование для удаления.");
+             JOptionPane.showMessageDialog(this, "Р’С‹Р±РµСЂРёС‚Рµ СЃРѕСЂРµРІРЅРѕРІР°РЅРёРµ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ.");
             return;
         }
 
-        if (JOptionPane.showConfirmDialog(this, "Удалить выбранное соревнование?", "Подтверждение", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+        if (JOptionPane.showConfirmDialog(this, "РЈРґР°Р»РёС‚СЊ РІС‹Р±СЂР°РЅРЅРѕРµ СЃРѕСЂРµРІРЅРѕРІР°РЅРёРµ?", "РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             Event selectedEvent = currentEvents.get(selectedRow);
             try {
                 apiClient.deleteEvent(selectedEvent.getId());
                 loadEventsAsync();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка удаления: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ: " + ex.getMessage(), "РћС€РёР±РєР° СЃРµС‚Рё", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -124,27 +133,27 @@ public class FrmEvent extends javax.swing.JDialog {
         lblStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Соревнования");
+        setTitle("РЎРѕСЂРµРІРЅРѕРІР°РЅРёСЏ");
 
         tblEvent.setModel(new javax.swing.table.DefaultTableModel(
                 new Object [][] {},
-                new String [] {"Название", "Место проведения", "Год", "Уровень"}
+                new String [] {"РќР°Р·РІР°РЅРёРµ", "РњРµСЃС‚Рѕ РїСЂРѕРІРµРґРµРЅРёСЏ", "Р“РѕРґ", "РЈСЂРѕРІРµРЅСЊ"}
         ));
         jScrollPane1.setViewportView(tblEvent);
 
-        btnAdd.setText("Добавить");
+        btnAdd.setText("Р”РѕР±Р°РІРёС‚СЊ");
         btnAdd.addActionListener(evt -> btnAddActionPerformed(evt));
 
-        btnEdit.setText("Изменить");
+        btnEdit.setText("РР·РјРµРЅРёС‚СЊ");
         btnEdit.addActionListener(evt -> btnEditActionPerformed(evt));
 
-        btnDelete.setText("Удалить");
+        btnDelete.setText("РЈРґР°Р»РёС‚СЊ");
         btnDelete.addActionListener(evt -> btnDeleteActionPerformed(evt));
         
-        btnClose.setText("Закрыть");
+        btnClose.setText("Р—Р°РєСЂС‹С‚СЊ");
         btnClose.addActionListener(evt -> btnCloseActionPerformed(evt));
 
-        lblStatus.setText("Статус");
+        lblStatus.setText("РЎС‚Р°С‚СѓСЃ");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -192,5 +201,4 @@ public class FrmEvent extends javax.swing.JDialog {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblEvent;
-    // End of variables declaration
 }

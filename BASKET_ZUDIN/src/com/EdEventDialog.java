@@ -18,16 +18,23 @@ public class EdEventDialog extends javax.swing.JDialog {
     public EdEventDialog(java.awt.Frame parent, boolean modal, Event event) {
         super(parent, modal);
         initComponents();
+        
+        // РРјРµРЅР° РґР»СЏ СЂРѕР±РѕС‚Р°-С‚РµСЃС‚РёСЂРѕРІС‰РёРєР° (AssertJ Swing)
+        tfEventName.setName("tfEventName");
+        tfLocation.setName("tfLocation");
+        tfYear.setName("tfYear");
+        cbLevel.setName("cbLevel");
+        
         this.setLocationRelativeTo(parent);
 
         loadLevelsForComboBox();
 
         if (event == null) {
             this.event = new Event();
-            setTitle("Добавление нового соревнования");
+            setTitle("Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕРіРѕ СЃРѕСЂРµРІРЅРѕРІР°РЅРёСЏ");
         } else {
             this.event = event;
-            setTitle("Редактирование соревнования");
+            setTitle("Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ СЃРѕСЂРµРІРЅРѕРІР°РЅРёСЏ");
             fillFields();
         }
     }
@@ -43,7 +50,7 @@ public class EdEventDialog extends javax.swing.JDialog {
     private void loadLevelsForComboBox() {
         cbLevel.setEnabled(false);
         cbLevel.removeAllItems();
-        cbLevel.addItem("Загрузка уровней...");
+        cbLevel.addItem("Р—Р°РіСЂСѓР·РєР° СѓСЂРѕРІРЅРµР№...");
 
         SwingWorker<List<Level>, Void> worker = new SwingWorker<>() {
             @Override
@@ -60,14 +67,14 @@ public class EdEventDialog extends javax.swing.JDialog {
                         for (Level level : levelList) {
                             cbLevel.addItem(level.getName());
                         }
-                        selectCurrentLevel(); // Выбираем текущий уровень после загрузки
+                        selectCurrentLevel(); // Р’С‹Р±РёСЂР°РµРј С‚РµРєСѓС‰РёР№ СѓСЂРѕРІРµРЅСЊ РїРѕСЃР»Рµ Р·Р°РіСЂСѓР·РєРё
                     } else {
-                        cbLevel.addItem("Нет доступных уровней");
+                        cbLevel.addItem("РќРµС‚ РґРѕСЃС‚СѓРїРЅС‹С… СѓСЂРѕРІРЅРµР№");
                         btnOk.setEnabled(false);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    cbLevel.addItem("Ошибка загрузки");
+                    cbLevel.addItem("РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё");
                     btnOk.setEnabled(false);
                 } finally {
                     cbLevel.setEnabled(true);
@@ -80,14 +87,14 @@ public class EdEventDialog extends javax.swing.JDialog {
     private void fillFields() {
         tfEventName.setText(event.getName());
         tfLocation.setText(event.getLocation());
-        tfYear.setText(String.valueOf(event.getYear() != 0 ? event.getYear() : ""));
+        tfYear.setText(String.valueOf(event.getYear() != null && event.getYear() != 0 ? event.getYear() : ""));
         selectCurrentLevel();
     }
 
     private void selectCurrentLevel() {
         if (event.getCompetitionLevel() != null && levelList != null) {
             for (int i = 0; i < levelList.size(); i++) {
-                if (levelList.get(i).getId() == event.getCompetitionLevel().getId()) {
+                if (levelList.get(i).getId().equals(event.getCompetitionLevel().getId())) {
                     cbLevel.setSelectedIndex(i);
                     break;
                 }
@@ -98,7 +105,7 @@ public class EdEventDialog extends javax.swing.JDialog {
     private boolean checkAndSave() {
         String eventName = tfEventName.getText();
         if (eventName == null || eventName.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Название соревнования не может быть пустым.", "Ошибка валидации", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "РќР°Р·РІР°РЅРёРµ СЃРѕСЂРµРІРЅРѕРІР°РЅРёСЏ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј.", "РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         event.setName(eventName);
@@ -106,7 +113,7 @@ public class EdEventDialog extends javax.swing.JDialog {
         try {
             event.setYear(Integer.parseInt(tfYear.getText()));
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Год должен быть числом.", "Ошибка валидации", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Р“РѕРґ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ С‡РёСЃР»РѕРј.", "РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё", JOptionPane.ERROR_MESSAGE);
             return false;
         }
 
@@ -114,7 +121,7 @@ public class EdEventDialog extends javax.swing.JDialog {
         if (selectedIndex != -1) {
             event.setCompetitionLevel(levelList.get(selectedIndex));
         } else {
-            JOptionPane.showMessageDialog(this, "Необходимо выбрать уровень соревнования!", "Ошибка валидации", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "РќРµРѕР±С…РѕРґРёРјРѕ РІС‹Р±СЂР°С‚СЊ СѓСЂРѕРІРµРЅСЊ СЃРѕСЂРµРІРЅРѕРІР°РЅРёСЏ!", "РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         return true;
@@ -132,7 +139,7 @@ public class EdEventDialog extends javax.swing.JDialog {
         this.setVisible(false);
     }
 
-    //<editor-fold defaultstate="collapsed" desc="Generated Code">
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">
     @SuppressWarnings("unchecked")
     private void initComponents() {
 
@@ -149,15 +156,15 @@ public class EdEventDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jLabel1.setText("Название:");
-        jLabel2.setText("Место проведения:");
-        jLabel3.setText("Год:");
-        jLabel4.setText("Уровень соревнования:");
+        jLabel1.setText("РќР°Р·РІР°РЅРёРµ:");
+        jLabel2.setText("РњРµСЃС‚Рѕ РїСЂРѕРІРµРґРµРЅРёСЏ:");
+        jLabel3.setText("Р“РѕРґ:");
+        jLabel4.setText("РЈСЂРѕРІРµРЅСЊ СЃРѕСЂРµРІРЅРѕРІР°РЅРёСЏ:");
 
         btnOk.setText("OK");
         btnOk.addActionListener(evt -> btnOkActionPerformed(evt));
 
-        btnCancel.setText("Отмена");
+        btnCancel.setText("РћС‚РјРµРЅР°");
         btnCancel.addActionListener(evt -> btnCancelActionPerformed(evt));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

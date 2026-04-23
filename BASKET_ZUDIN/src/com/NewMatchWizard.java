@@ -66,11 +66,22 @@ public class NewMatchWizard extends JRDialog {
 
     public NewMatchWizard(java.awt.Frame parent) {
         super(parent, true);
-        setTitle("Новый матч");
+        setTitle("РќРѕРІС‹Р№ РјР°С‚С‡");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        eventLevelLabel = new JLabel("Не выбран");
+        eventLevelLabel = new JLabel("РќРµ РІС‹Р±СЂР°РЅ");
 
         createGUI();
+        
+        // РЈСЃС‚Р°РЅРѕРІРєР° РёРјРµРЅ РґР»СЏ UI-С‚РµСЃС‚РѕРІ
+        levelComboBox.setName("levelComboBox");
+        eventComboBox.setName("eventComboBox");
+        team1ComboBox.setName("team1ComboBox");
+        team2ComboBox.setName("team2ComboBox");
+        matchPlaygroundField.setName("matchPlaygroundField");
+        matchDateField.setName("matchDateField");
+        btnNext.setName("btnNext");
+        btnPrev.setName("btnPrev");
+        
         showCard(currentCardName);
         bindListeners();
         loadInitialData();
@@ -80,7 +91,7 @@ public class NewMatchWizard extends JRDialog {
         setLocationRelativeTo(parent);
     }
 
-    // --- НОВЫЕ МЕТОДЫ ДЛЯ ПЕРЕДАЧИ ИГРОКОВ В МАТЧ ---
+    // --- РњРµС‚РѕРґС‹ РґР»СЏ РїРµСЂРµРґР°С‡Рё РёРіСЂРѕРєРѕРІ РІ РјР°С‚С‡ ---
     public List<Player> getActivePlayersTeam1() {
         List<Player> list = new ArrayList<>();
         DefaultListModel<Player> model = (DefaultListModel<Player>) playerList1.getModel();
@@ -94,7 +105,6 @@ public class NewMatchWizard extends JRDialog {
         for (int i = 0; i < model.getSize(); i++) list.add(model.getElementAt(i));
         return list;
     }
-    // ------------------------------------------------
 
     private void loadInitialData() {
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
@@ -129,13 +139,20 @@ public class NewMatchWizard extends JRDialog {
         playerPanel = createPlayerPanel();
         matchPanel = createMatchPanel();
 
-        cardPanel.add(levelPanel, "levelPanel"); cardPanel.add(eventPanel, "eventPanel");
-        cardPanel.add(teamPanel, "teamPanel"); cardPanel.add(playerPanel, "playerPanel");
+        cardPanel.add(levelPanel, "levelPanel"); 
+        cardPanel.add(eventPanel, "eventPanel");
+        cardPanel.add(teamPanel, "teamPanel"); 
+        cardPanel.add(playerPanel, "playerPanel");
         cardPanel.add(matchPanel, "matchPanel");
 
-        btnNext = new JButton("Далее"); btnPrev = new JButton("Назад"); btnCancel = new JButton("Отмена");
+        btnNext = new JButton("Р”Р°Р»РµРµ"); 
+        btnPrev = new JButton("РќР°Р·Р°Рґ"); 
+        btnCancel = new JButton("РћС‚РјРµРЅР°");
+        
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.add(btnPrev); buttonPanel.add(btnNext); buttonPanel.add(btnCancel);
+        buttonPanel.add(btnPrev); 
+        buttonPanel.add(btnNext); 
+        buttonPanel.add(btnCancel);
 
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(cardPanel, BorderLayout.CENTER);
@@ -145,11 +162,11 @@ public class NewMatchWizard extends JRDialog {
     private JPanel createLevelPanel() {
         JPanel panel = new JPanel(new MigLayout("insets 5", "[][]", "[]5[]10[]"));
         levelComboBox = new JComboBox<>(); 
-        panel.add(new JLabel("Выбрать существующий уровень:")); panel.add(levelComboBox, "growx, wrap");
-        panel.add(new JLabel("Код (оставьте пустым для нового):")); levelCodField = new JTextField(10); panel.add(levelCodField, "span");
-        panel.add(new JLabel("Наименование:")); levelNameField = new JTextField(50); panel.add(levelNameField, "span, wrap");
+        panel.add(new JLabel("Р’С‹Р±СЂР°С‚СЊ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ СѓСЂРѕРІРµРЅСЊ:")); panel.add(levelComboBox, "growx, wrap");
+        panel.add(new JLabel("РљРѕРґ (РѕСЃС‚Р°РІСЊС‚Рµ РїСѓСЃС‚С‹Рј РґР»СЏ РЅРѕРІРѕРіРѕ):")); levelCodField = new JTextField(10); panel.add(levelCodField, "span");
+        panel.add(new JLabel("РќР°РёРјРµРЅРѕРІР°РЅРёРµ:")); levelNameField = new JTextField(50); panel.add(levelNameField, "span, wrap");
 
-        JButton btnAddLevel = new JButton("Сохранить/Добавить уровень");
+        JButton btnAddLevel = new JButton("РЎРѕС…СЂР°РЅРёС‚СЊ/Р”РѕР±Р°РІРёС‚СЊ СѓСЂРѕРІРµРЅСЊ");
         panel.add(btnAddLevel, "growx, span, wrap");
 
         btnAddLevel.addActionListener(e -> {
@@ -157,10 +174,10 @@ public class NewMatchWizard extends JRDialog {
             if (tempLevel != null) {
                 try {
                     newLevel = apiClient.saveLevel(tempLevel); 
-                    JOptionPane.showMessageDialog(this, "Уровень сохранен в БД!");
+                    JOptionPane.showMessageDialog(this, "РЈСЂРѕРІРµРЅСЊ СЃРѕС…СЂР°РЅРµРЅ РІ Р‘Р”!");
                     levelCodField.setText(String.valueOf(newLevel.getId()));
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, "Ошибка: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "РћС€РёР±РєР°: " + ex.getMessage(), "РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -178,14 +195,14 @@ public class NewMatchWizard extends JRDialog {
     private JPanel createEventPanel() {
         JPanel panel = new JPanel(new MigLayout("insets 5", "[][]", "[]5[]10[]"));
         eventComboBox = new JComboBox<>();
-        panel.add(new JLabel("Выбрать соревнование:")); panel.add(eventComboBox, "growx, wrap");
-        panel.add(new JLabel("Код:")); eventCodField = new JTextField(6); panel.add(eventCodField, "span");
-        panel.add(new JLabel("Название:")); eventNameField = new JTextField(20); panel.add(eventNameField, "span");
-        panel.add(new JLabel("Место:")); eventLocField = new JTextField(30); panel.add(eventLocField, "span");
-        panel.add(new JLabel("Год:")); eventYearField = new JTextField(10); panel.add(eventYearField, "span, wrap");
+        panel.add(new JLabel("Р’С‹Р±СЂР°С‚СЊ СЃРѕСЂРµРІРЅРѕРІР°РЅРёРµ:")); panel.add(eventComboBox, "growx, wrap");
+        panel.add(new JLabel("РљРѕРґ:")); eventCodField = new JTextField(6); panel.add(eventCodField, "span");
+        panel.add(new JLabel("РќР°Р·РІР°РЅРёРµ:")); eventNameField = new JTextField(20); panel.add(eventNameField, "span");
+        panel.add(new JLabel("РњРµСЃС‚Рѕ:")); eventLocField = new JTextField(30); panel.add(eventLocField, "span");
+        panel.add(new JLabel("Р“РѕРґ:")); eventYearField = new JTextField(10); panel.add(eventYearField, "span, wrap");
 
         eventLevelComboBox = new JComboBox<>();
-        JButton btnAddEvent = new JButton("Сохранить/Добавить соревнование");
+        JButton btnAddEvent = new JButton("РЎРѕС…СЂР°РЅРёС‚СЊ/Р”РѕР±Р°РІРёС‚СЊ СЃРѕСЂРµРІРЅРѕРІР°РЅРёРµ");
         panel.add(btnAddEvent, "growx, span, wrap");
 
         btnAddEvent.addActionListener(e -> {
@@ -193,7 +210,7 @@ public class NewMatchWizard extends JRDialog {
             if (tempEvent != null) {
                 try {
                     newEvent = apiClient.saveEvent(tempEvent);
-                    JOptionPane.showMessageDialog(this, "Соревнование сохранено в БД!");
+                    JOptionPane.showMessageDialog(this, "РЎРѕСЂРµРІРЅРѕРІР°РЅРёРµ СЃРѕС…СЂР°РЅРµРЅРѕ РІ Р‘Р”!");
                     eventCodField.setText(String.valueOf(newEvent.getId()));
                 } catch (Exception ex) {}
             }
@@ -217,34 +234,34 @@ public class NewMatchWizard extends JRDialog {
         JPanel team2Panel = new JPanel(new MigLayout("insets 5", "[][]", "[]5[]10[]"));
 
         team1ComboBox = new JComboBox<>();
-        team1Panel.add(new JLabel("Выбрать команду 1:")); team1Panel.add(team1ComboBox, "growx, wrap");
-        team1Panel.add(new JLabel("Код:")); team1CodField = new JTextField(10); team1Panel.add(team1CodField, "span");
-        team1Panel.add(new JLabel("Наименование:")); team1NameField = new JTextField(40); team1Panel.add(team1NameField, "span");
-        team1Panel.add(new JLabel("Город:")); team1CityField = new JTextField(10); team1Panel.add(team1CityField, "span");
-        team1Panel.add(new JLabel("Пол команды:")); team1GenderField = new JTextField(10); team1Panel.add(team1GenderField, "span, wrap");
+        team1Panel.add(new JLabel("Р’С‹Р±СЂР°С‚СЊ РєРѕРјР°РЅРґСѓ 1:")); team1Panel.add(team1ComboBox, "growx, wrap");
+        team1Panel.add(new JLabel("РљРѕРґ:")); team1CodField = new JTextField(10); team1Panel.add(team1CodField, "span");
+        team1Panel.add(new JLabel("РќР°РёРјРµРЅРѕРІР°РЅРёРµ:")); team1NameField = new JTextField(40); team1Panel.add(team1NameField, "span");
+        team1Panel.add(new JLabel("Р“РѕСЂРѕРґ:")); team1CityField = new JTextField(10); team1Panel.add(team1CityField, "span");
+        team1Panel.add(new JLabel("РџРѕР» РєРѕРјР°РЅРґС‹:")); team1GenderField = new JTextField(10); team1Panel.add(team1GenderField, "span, wrap");
 
-        JButton btnAddTeam1 = new JButton("Сохранить/Добавить команду 1");
+        JButton btnAddTeam1 = new JButton("РЎРѕС…СЂР°РЅРёС‚СЊ/Р”РѕР±Р°РІРёС‚СЊ РєРѕРјР°РЅРґСѓ 1");
         team1Panel.add(btnAddTeam1, "growx, span, wrap");
         btnAddTeam1.addActionListener(e -> {
             Team temp = constructTeam(team1CodField, team1NameField, team1CityField, team1GenderField);
             if (temp != null) {
-                try { newTeam1 = apiClient.saveTeam(temp); JOptionPane.showMessageDialog(this, "Команда 1 сохранена!"); team1CodField.setText(String.valueOf(newTeam1.getId()));} catch (Exception ex) {}
+                try { newTeam1 = apiClient.saveTeam(temp); JOptionPane.showMessageDialog(this, "РљРѕРјР°РЅРґР° 1 СЃРѕС…СЂР°РЅРµРЅР°!"); team1CodField.setText(String.valueOf(newTeam1.getId()));} catch (Exception ex) {}
             }
         });
 
         team2ComboBox = new JComboBox<>();
-        team2Panel.add(new JLabel("Выбрать команду 2:")); team2Panel.add(team2ComboBox, "growx, wrap");
-        team2Panel.add(new JLabel("Код:")); team2CodField = new JTextField(10); team2Panel.add(team2CodField, "span");
-        team2Panel.add(new JLabel("Наименование:")); team2NameField = new JTextField(40); team2Panel.add(team2NameField, "span");
-        team2Panel.add(new JLabel("Город:")); team2CityField = new JTextField(10); team2Panel.add(team2CityField, "span");
-        team2Panel.add(new JLabel("Пол команды:")); team2GenderField = new JTextField(10); team2Panel.add(team2GenderField, "span, wrap");
+        team2Panel.add(new JLabel("Р’С‹Р±СЂР°С‚СЊ РєРѕРјР°РЅРґСѓ 2:")); team2Panel.add(team2ComboBox, "growx, wrap");
+        team2Panel.add(new JLabel("РљРѕРґ:")); team2CodField = new JTextField(10); team2Panel.add(team2CodField, "span");
+        team2Panel.add(new JLabel("РќР°РёРјРµРЅРѕРІР°РЅРёРµ:")); team2NameField = new JTextField(40); team2Panel.add(team2NameField, "span");
+        team2Panel.add(new JLabel("Р“РѕСЂРѕРґ:")); team2CityField = new JTextField(10); team2Panel.add(team2CityField, "span");
+        team2Panel.add(new JLabel("РџРѕР» РєРѕРјР°РЅРґС‹:")); team2GenderField = new JTextField(10); team2Panel.add(team2GenderField, "span, wrap");
 
-        JButton btnAddTeam2 = new JButton("Сохранить/Добавить команду 2");
+        JButton btnAddTeam2 = new JButton("РЎРѕС…СЂР°РЅРёС‚СЊ/Р”РѕР±Р°РІРёС‚СЊ РєРѕРјР°РЅРґСѓ 2");
         team2Panel.add(btnAddTeam2, "growx, span, wrap");
         btnAddTeam2.addActionListener(e -> {
             Team temp = constructTeam(team2CodField, team2NameField, team2CityField, team2GenderField);
             if (temp != null) {
-                try { newTeam2 = apiClient.saveTeam(temp); JOptionPane.showMessageDialog(this, "Команда 2 сохранена!"); team2CodField.setText(String.valueOf(newTeam2.getId()));} catch (Exception ex) {}
+                try { newTeam2 = apiClient.saveTeam(temp); JOptionPane.showMessageDialog(this, "РљРѕРјР°РЅРґР° 2 СЃРѕС…СЂР°РЅРµРЅР°!"); team2CodField.setText(String.valueOf(newTeam2.getId()));} catch (Exception ex) {}
             }
         });
 
@@ -268,32 +285,31 @@ public class NewMatchWizard extends JRDialog {
 
         player1NameField = new JTextField(20); player1DaterField = new JFormattedTextField(createFormatter("##-##-####")); player1HeieField = new JTextField(10); player1WeieField = new JTextField(10); player1RoleField = new JTextField(15); player1NumField = new JTextField(5); player1GeedField = new JTextField(5);
         playerList1 = new JList<>();
-        team1NameLabel = new JLabel("Не выбрана");
-        p1.add(new JLabel("Команда:"), "growx, wrap"); p1.add(team1NameLabel, "growx, wrap");
-        p1.add(new JLabel("Участвуют в матче:")); p1.add(new JScrollPane(playerList1), "growx, span, wrap");
+        team1NameLabel = new JLabel("РќРµ РІС‹Р±СЂР°РЅР°");
+        p1.add(new JLabel("РљРѕРјР°РЅРґР°:"), "growx, wrap"); p1.add(team1NameLabel, "growx, wrap");
+        p1.add(new JLabel("РЈС‡Р°СЃС‚РІСѓСЋС‚ РІ РјР°С‚С‡Рµ:")); p1.add(new JScrollPane(playerList1), "growx, span, wrap");
         addPlayerFields(p1, player1NameField, player1DaterField, player1HeieField, player1WeieField, player1RoleField, player1NumField, player1GeedField);
-        btnAddPlayer1 = new JButton("Создать и добавить игрока"); p1.add(btnAddPlayer1, "growx, span, wrap");
-        JButton btnDeletePlayer1 = new JButton("Убрать игрока из матча"); p1.add(btnDeletePlayer1, "growx, span, wrap");
+        btnAddPlayer1 = new JButton("РЎРѕР·РґР°С‚СЊ Рё РґРѕР±Р°РІРёС‚СЊ РёРіСЂРѕРєР°"); p1.add(btnAddPlayer1, "growx, span, wrap");
+        JButton btnDeletePlayer1 = new JButton("РЈР±СЂР°С‚СЊ РёРіСЂРѕРєР° РёР· РјР°С‚С‡Р°"); p1.add(btnDeletePlayer1, "growx, span, wrap");
 
         player2NameField = new JTextField(20); player2DaterField = new JFormattedTextField(createFormatter("##-##-####")); player2HeieField = new JTextField(10); player2WeieField = new JTextField(10); player2RoleField = new JTextField(15); player2NumField = new JTextField(5); player2GeedField = new JTextField(5);
         playerList2 = new JList<>();
-        team2NameLabel = new JLabel("Не выбрана");
-        p2.add(new JLabel("Команда:"), "growx, wrap"); p2.add(team2NameLabel, "growx, wrap");
-        p2.add(new JLabel("Участвуют в матче:")); p2.add(new JScrollPane(playerList2), "growx, span, wrap");
+        team2NameLabel = new JLabel("РќРµ РІС‹Р±СЂР°РЅР°");
+        p2.add(new JLabel("РљРѕРјР°РЅРґР°:"), "growx, wrap"); p2.add(team2NameLabel, "growx, wrap");
+        p2.add(new JLabel("РЈС‡Р°СЃС‚РІСѓСЋС‚ РІ РјР°С‚С‡Рµ:")); p2.add(new JScrollPane(playerList2), "growx, span, wrap");
         addPlayerFields(p2, player2NameField, player2DaterField, player2HeieField, player2WeieField, player2RoleField, player2NumField, player2GeedField);
-        btnAddPlayer2 = new JButton("Создать и добавить игрока"); p2.add(btnAddPlayer2, "growx, span, wrap");
-        JButton btnDeletePlayer2 = new JButton("Убрать игрока из матча"); p2.add(btnDeletePlayer2, "growx, span, wrap");
+        btnAddPlayer2 = new JButton("РЎРѕР·РґР°С‚СЊ Рё РґРѕР±Р°РІРёС‚СЊ РёРіСЂРѕРєР°"); p2.add(btnAddPlayer2, "growx, span, wrap");
+        JButton btnDeletePlayer2 = new JButton("РЈР±СЂР°С‚СЊ РёРіСЂРѕРєР° РёР· РјР°С‚С‡Р°"); p2.add(btnDeletePlayer2, "growx, span, wrap");
 
-        // ЛОГИКА ИГРОКОВ: Сохраняем в БД сразу!
         btnAddPlayer1.addActionListener(e -> {
             Player p = constructPlayer(player1NameField, player1DaterField, player1HeieField, player1WeieField, player1RoleField, player1NumField, player1GeedField);
             if (p != null) {
                 p.setTeam(newTeam1);
                 try {
-                    p = apiClient.savePlayer(p); // Сохраняем в БД и получаем ID
-                    ((DefaultListModel<Player>) playerList1.getModel()).addElement(p); // Добавляем в текущий матч
+                    p = apiClient.savePlayer(p); 
+                    ((DefaultListModel<Player>) playerList1.getModel()).addElement(p); 
                     clearPlayerFields(player1NameField, player1DaterField, player1HeieField, player1WeieField, player1RoleField, player1NumField, player1GeedField);
-                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Ошибка: " + ex.getMessage()); }
+                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "РћС€РёР±РєР°: " + ex.getMessage()); }
             }
         });
 
@@ -305,11 +321,10 @@ public class NewMatchWizard extends JRDialog {
                     p = apiClient.savePlayer(p);
                     ((DefaultListModel<Player>) playerList2.getModel()).addElement(p);
                     clearPlayerFields(player2NameField, player2DaterField, player2HeieField, player2WeieField, player2RoleField, player2NumField, player2GeedField);
-                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Ошибка: " + ex.getMessage()); }
+                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "РћС€РёР±РєР°: " + ex.getMessage()); }
             }
         });
 
-        // УДАЛЕНИЕ: Просто убираем из JList (из матча), но НЕ из БД!
         btnDeletePlayer1.addActionListener(e -> {
             int idx = playerList1.getSelectedIndex();
             if (idx != -1) ((DefaultListModel<Player>) playerList1.getModel()).remove(idx);
@@ -325,18 +340,18 @@ public class NewMatchWizard extends JRDialog {
     }
 
     private void addPlayerFields(JPanel p, JTextField name, JTextField date, JTextField h, JTextField w, JTextField role, JTextField num, JTextField gen) {
-        p.add(new JLabel("ФИО:")); p.add(name, "span");
-        p.add(new JLabel("Дата рожд.:")); p.add(date, "span");
-        p.add(new JLabel("Рост:")); p.add(h, "span");
-        p.add(new JLabel("Вес:")); p.add(w, "span");
-        p.add(new JLabel("Роль:")); p.add(role, "span");
-        p.add(new JLabel("Номер:")); p.add(num, "span");
-        p.add(new JLabel("Пол:")); p.add(gen, "span, wrap");
+        p.add(new JLabel("Р¤РРћ:")); p.add(name, "span");
+        p.add(new JLabel("Р”Р°С‚Р° СЂРѕР¶Рґ.:")); p.add(date, "span");
+        p.add(new JLabel("Р РѕСЃС‚:")); p.add(h, "span");
+        p.add(new JLabel("Р’РµСЃ:")); p.add(w, "span");
+        p.add(new JLabel("Р РѕР»СЊ:")); p.add(role, "span");
+        p.add(new JLabel("РќРѕРјРµСЂ:")); p.add(num, "span");
+        p.add(new JLabel("РџРѕР»:")); p.add(gen, "span, wrap");
     }
 
     private void updatePlayerLists() {
-        team1NameLabel.setText(newTeam1 != null ? newTeam1.getName() : "Не выбрана");
-        team2NameLabel.setText(newTeam2 != null ? newTeam2.getName() : "Не выбрана");
+        team1NameLabel.setText(newTeam1 != null ? newTeam1.getName() : "РќРµ РІС‹Р±СЂР°РЅР°");
+        team2NameLabel.setText(newTeam2 != null ? newTeam2.getName() : "РќРµ РІС‹Р±СЂР°РЅР°");
 
         if (newTeam1 != null && newTeam1.getPlayers() != null) {
             DefaultListModel<Player> model1 = new DefaultListModel<>();
@@ -355,8 +370,8 @@ public class NewMatchWizard extends JRDialog {
         JPanel panel = new JPanel(new MigLayout("insets 5", "[][]", "[]5[]10[]"));
         matchPlaygroundField = new JTextField(50);
         matchDateField = new JFormattedTextField(createFormatter("##-##-####"));
-        panel.add(new JLabel("Поле проведения:")); panel.add(matchPlaygroundField, "span, wrap");
-        panel.add(new JLabel("Дата проведения:")); panel.add(matchDateField, "span, wrap");
+        panel.add(new JLabel("РџРѕР»Рµ РїСЂРѕРІРµРґРµРЅРёСЏ:")); panel.add(matchPlaygroundField, "span, wrap");
+        panel.add(new JLabel("Р”Р°С‚Р° РїСЂРѕРІРµРґРµРЅРёСЏ:")); panel.add(matchDateField, "span, wrap");
         return panel;
     }
 
@@ -423,6 +438,15 @@ public class NewMatchWizard extends JRDialog {
                 case "teamPanel":
                     newTeam1 = (Team) team1ComboBox.getSelectedItem();
                     newTeam2 = (Team) team2ComboBox.getSelectedItem();
+                    
+                    if (newTeam1 != null && newTeam2 != null && newTeam1.getId().equals(newTeam2.getId())) {
+                        JOptionPane.showMessageDialog(this, 
+                            "РљРѕРјР°РЅРґР° 1 Рё РљРѕРјР°РЅРґР° 2 РЅРµ РјРѕРіСѓС‚ Р±С‹С‚СЊ РѕРґРёРЅР°РєРѕРІС‹РјРё!", 
+                            "РћС€РёР±РєР° РІС‹Р±РѕСЂР°", 
+                            JOptionPane.ERROR_MESSAGE);
+                        return; 
+                    }
+                    
                     updatePlayerLists();
                     showCard("playerPanel");
                     break;
@@ -439,13 +463,13 @@ public class NewMatchWizard extends JRDialog {
                         String dateText = matchDateField.getText();
                         if (dateText.substring(0, 1).trim().equals("")) newMatch.setDate(null);
                         else newMatch.setDate(LocalDate.parse(dateText, DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-                    } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Неверная дата!"); return; }
+                    } catch (Exception ex) { JOptionPane.showMessageDialog(this, "РќРµРІРµСЂРЅР°СЏ РґР°С‚Р°!"); return; }
 
                     try {
                         newMatch = apiClient.saveMatch(newMatch);
                         setDialogResult(JDialogResult.OK);
                         close();
-                    } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Ошибка сети: " + ex.getMessage()); }
+                    } catch (Exception ex) { JOptionPane.showMessageDialog(this, "РћС€РёР±РєР° СЃРµС‚Рё: " + ex.getMessage()); }
                     break;
             }
         });
@@ -466,7 +490,7 @@ public class NewMatchWizard extends JRDialog {
         cardLayout.show(cardPanel, cardName);
         currentCardName = cardName;
         btnPrev.setEnabled(!currentCardName.equals("levelPanel"));
-        btnNext.setText(currentCardName.equals("matchPanel") ? "Завершить" : "Далее");
+        btnNext.setText(currentCardName.equals("matchPanel") ? "Р—Р°РІРµСЂС€РёС‚СЊ" : "Р”Р°Р»РµРµ");
     }
 
     protected MaskFormatter createFormatter(String s) {
