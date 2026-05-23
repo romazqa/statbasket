@@ -11,6 +11,8 @@ public class EdTeamDialog extends javax.swing.JDialog {
     public EdTeamDialog(java.awt.Frame parent, boolean modal, Team team) {
         super(parent, modal);
         initComponents();
+        btnOk.setName("btnOk");
+        btnCancel.setName("btnCancel");
         
         // Установка имен компонентов для робота-тестировщика
         tfTeamName.setName("tfTeamName");

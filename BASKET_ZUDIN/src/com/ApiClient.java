@@ -161,4 +161,33 @@ public class ApiClient {
         
         return objectMapper.readValue(response.body(), Matches.class);
     }
+    
+    public Matches getMatchById(int id) throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/matches/" + id)).GET().build();
+        return objectMapper.readValue(sendRequest(request).body(), Matches.class);
+    }
+    
+    public static class MatchPage {
+        public List<Matches> matches;
+        public int currentPage;
+        public int totalPages;
+    }
+
+    // --- НОВЫЙ МЕТОД: Запрос страницы матчей ---
+    public MatchPage getMatchesPage(int page, int size) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/matches/paged?page=" + page + "&size=" + size))
+                .GET().build();
+        
+        String json = sendRequest(request).body();
+        com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(json);
+        
+        MatchPage result = new MatchPage();
+        result.currentPage = rootNode.get("currentPage").asInt();
+        result.totalPages = rootNode.get("totalPages").asInt();
+        // Извлекаем массив матчей
+        result.matches = objectMapper.convertValue(rootNode.get("matches"), new TypeReference<List<Matches>>() {});
+        
+        return result;
+    }
 }

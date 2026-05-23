@@ -77,8 +77,8 @@ public class EdStatDialog extends JRDialog {
         // Асинхронная загрузка списка игроков с сервера
         loadDataAsync();
         
-        setSize(900, 500);
-        setResizable(false);
+        pack(); 
+        setSize(Math.max(500, getWidth()), getHeight() + 20);
         setLocationRelativeTo(parent);
     }
 

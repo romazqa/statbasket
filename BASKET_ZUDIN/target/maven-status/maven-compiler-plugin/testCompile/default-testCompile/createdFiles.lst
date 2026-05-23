@@ -58,6 +58,7 @@ com\JDialogResult.class
 com\FrmMatches.class
 com\FrmPlayer.class
 com\NewMatchWizard.class
+com\MainWindow$1.class
 com\FrmEvent$1.class
 com\FrmMatches$1.class
 com\EdStatDialog.class

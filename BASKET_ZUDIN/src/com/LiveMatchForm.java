@@ -433,14 +433,40 @@ public class LiveMatchForm extends JFrame {
 
                 SwingWorker<Void, Void> worker = new SwingWorker<>() {
                     @Override protected Void doInBackground() throws Exception { apiClient.saveMatch(currentMatch); return null; }
-                    @Override protected void done() {
+                    protected void done() {
                         try {
                             get();
-                            JOptionPane.showMessageDialog(LiveMatchForm.this, "Матч успешно сохранен!");
+                            JOptionPane.showMessageDialog(LiveMatchForm.this, "Матч успешно сохранен на сервере!");
                             createMatchReport();
                             dispose();
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(LiveMatchForm.this, "Ошибка сохранения: " + ex.getMessage());
+                            // --- ВКЛЮЧАЕМ МЕХАНИЗМ СПАСЕНИЯ ДАННЫХ ---
+                        	try {
+                                // 1. Получаем домашнюю папку пользователя (C:\Users\Имя\)
+                                String userHome = System.getProperty("user.home");
+                                // 2. Создаем там скрытую папку для нашей программы
+                                java.io.File backupDir = new java.io.File(userHome, ".statbasket_backups");
+                                if (!backupDir.exists()) {
+                                    backupDir.mkdirs(); // Создаем папку, если её нет
+                                }
+                                
+                                // 3. Создаем файл внутри этой папки
+                                String fileName = "backup_match_" + System.currentTimeMillis() + ".json";
+                                java.io.File backupFile = new java.io.File(backupDir, fileName);
+                                
+                                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                                mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+                                mapper.writeValue(backupFile, currentMatch);
+                                
+                                JOptionPane.showMessageDialog(LiveMatchForm.this, 
+                                    "Сервер недоступен! \nДанные сохранены в систему: \n" + backupFile.getAbsolutePath() + "\n\nВоспользуйтесь кнопкой Синхронизации позже.", 
+                                    "Резервное сохранение", 
+                                    JOptionPane.WARNING_MESSAGE);
+                                    
+                                dispose(); 
+                            } catch (Exception fileEx) {
+                                JOptionPane.showMessageDialog(LiveMatchForm.this, "Критическая ошибка сохранения!", "Ошибка:", JOptionPane.ERROR_MESSAGE);
+                            }
                         }
                     }
                 };

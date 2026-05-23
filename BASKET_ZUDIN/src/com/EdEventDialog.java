@@ -24,6 +24,8 @@ public class EdEventDialog extends javax.swing.JDialog {
         tfLocation.setName("tfLocation");
         tfYear.setName("tfYear");
         cbLevel.setName("cbLevel");
+        btnOk.setName("btnOk");
+        btnCancel.setName("btnCancel");
         
         this.setLocationRelativeTo(parent);
 

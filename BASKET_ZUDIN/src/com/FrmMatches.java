@@ -2,206 +2,191 @@ package com;
 
 import com.data.Matches;
 import com.gui.GuiHelper;
-
 import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.util.List;
 
 public class FrmMatches extends javax.swing.JDialog {
 
     private final ApiClient apiClient = new ApiClient();
     private List<Matches> currentMatches;
+    
+    // Переменные для пагинации
+    private int currentPage = 0;
+    private final int pageSize = 15; // Загружаем по 15 матчей за раз
+    private int totalPages = 1;
 
-    /**
-     * Creates new form FrmMatches
-     */
     public FrmMatches(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         
-        // Установка имен для UI-тестов
         tblMatches.setName("tblMatches");
-        btnAdd.setName("btnAdd");
-        btnEdit.setName("btnEdit");
-        btnDelete.setName("btnDelete");
-        btnClose.setName("btnClose");
-        lblStatus.setName("lblStatus");
-        
+        btnDelete.setName("btnDelete"); // Оставили для тестов
+
         this.setLocationRelativeTo(parent);
         loadMatchesAsync();
     }
 
     private void loadMatchesAsync() {
-        lblStatus.setText("Загрузка матчей с сервера...");
-        btnAdd.setEnabled(false);
-        btnEdit.setEnabled(false);
-        btnDelete.setEnabled(false);
+        lblStatus.setText("Загрузка матчей...");
+        setButtonsEnabled(false);
 
-        SwingWorker<List<Matches>, Void> worker = new SwingWorker<>() {
+        SwingWorker<ApiClient.MatchPage, Void> worker = new SwingWorker<>() {
             @Override
-            protected List<Matches> doInBackground() throws Exception {
-                return apiClient.getAllMatches();
+            protected ApiClient.MatchPage doInBackground() throws Exception {
+                // Запрашиваем конкретную страницу
+                return apiClient.getMatchesPage(currentPage, pageSize);
             }
 
             @Override
             protected void done() {
                 try {
-                    currentMatches = get();
+                    ApiClient.MatchPage pageInfo = get();
+                    currentMatches = pageInfo.matches;
+                    totalPages = pageInfo.totalPages == 0 ? 1 : pageInfo.totalPages; // Защита от 0 страниц
+                    
                     GuiHelper.addObjectsToTable(tblMatches, currentMatches);
-                    lblStatus.setText("Матчи успешно загружены.");
+                    
+                    lblStatus.setText("Страница " + (currentPage + 1) + " из " + totalPages);
+                    
+                    // Управление кнопками страниц
+                    btnPrevPage.setEnabled(currentPage > 0);
+                    btnNextPage.setEnabled(currentPage < totalPages - 1);
+                    
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    lblStatus.setText("Ошибка загрузки данных!");
-                    JOptionPane.showMessageDialog(FrmMatches.this, "Ошибка загрузки: " + e.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(FrmMatches.this, "Ошибка: " + e.getMessage());
                 } finally {
-                    btnAdd.setEnabled(true);
-                    btnEdit.setEnabled(true);
-                    btnDelete.setEnabled(true);
+                    setButtonsEnabled(true);
                 }
             }
         };
         worker.execute();
     }
 
+    private void setButtonsEnabled(boolean enabled) {
+        btnAdd.setEnabled(enabled);
+        btnEdit.setEnabled(enabled);
+        btnStats.setEnabled(enabled);
+        btnDelete.setEnabled(enabled);
+    }
+
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {
         EdMatchesDialog dlg = new EdMatchesDialog(null, true, null);
         dlg.setVisible(true);
-
         if (dlg.getDialogResult() == JDialogResult.OK) {
-            try {
-                apiClient.saveMatch(dlg.getMatches());
-                loadMatchesAsync();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка сохранения матча: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
-            }
+            try { apiClient.saveMatch(dlg.getMatches()); loadMatchesAsync(); } catch (Exception ex) {}
         }
     }
 
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {
-        int selectedRow = tblMatches.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Выберите матч для редактирования.");
-            return;
-        }
-
-        Matches selectedMatch = currentMatches.get(selectedRow);
-
-        EdMatchesDialog dlg = new EdMatchesDialog(null, true, selectedMatch);
+        int row = tblMatches.getSelectedRow();
+        if (row == -1) return;
+        EdMatchesDialog dlg = new EdMatchesDialog(null, true, currentMatches.get(row));
         dlg.setVisible(true);
-
         if (dlg.getDialogResult() == JDialogResult.OK) {
-            try {
-                apiClient.saveMatch(dlg.getMatches());
-                loadMatchesAsync();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка сохранения матча: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
-            }
+            try { apiClient.saveMatch(dlg.getMatches()); loadMatchesAsync(); } catch (Exception ex) {}
         }
+    }
+
+    private void btnStatsActionPerformed(java.awt.event.ActionEvent evt) {
+        int row = tblMatches.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Выберите матч."); return;
+        }
+
+        setButtonsEnabled(false);
+        lblStatus.setText("Загрузка статистики...");
+
+        SwingWorker<Matches, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Matches doInBackground() throws Exception {
+                return apiClient.getMatchById(currentMatches.get(row).getId());
+            }
+            @Override
+            protected void done() {
+                try {
+                    FrmMatchStats statsForm = new FrmMatchStats(null, get());
+                    statsForm.setVisible(true);
+                    loadMatchesAsync();
+                } catch (Exception e) {} finally { setButtonsEnabled(true); }
+            }
+        };
+        worker.execute();
     }
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {
-        int selectedRow = tblMatches.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Выберите матч для удаления.");
-            return;
-        }
-
-        if (JOptionPane.showConfirmDialog(this, "Вы уверены, что хотите удалить выбранный матч?", "Подтверждение удаления", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            Matches selectedMatch = currentMatches.get(selectedRow);
+        int row = tblMatches.getSelectedRow();
+        if (row == -1) return;
+        if (JOptionPane.showConfirmDialog(this, "Удалить матч?", "Подтверждение", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             try {
-                apiClient.deleteMatch(selectedMatch.getId());
+                apiClient.deleteMatch(currentMatches.get(row).getId());
+                // Если мы удалили последний элемент на странице, возвращаемся назад
+                if (currentMatches.size() == 1 && currentPage > 0) currentPage--;
                 loadMatchesAsync();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Ошибка удаления: " + ex.getMessage(), "Ошибка сети", JOptionPane.ERROR_MESSAGE);
-            }
+            } catch (Exception ex) { }
         }
-    }
-
-    private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {
-        this.dispose();
     }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
-    @SuppressWarnings("unchecked")
     private void initComponents() {
+        jScrollPane1 = new JScrollPane();
+        tblMatches = new JTable();
+        
+        btnAdd = new JButton("Добавить");
+        btnEdit = new JButton("Изменить");
+        btnStats = new JButton("Статистика");
+        btnDelete = new JButton("Удалить");
+        btnClose = new JButton("Закрыть");
+        
+        btnPrevPage = new JButton("<< Пред.");
+        btnNextPage = new JButton("След. >>");
+        lblStatus = new JLabel("Статус");
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tblMatches = new javax.swing.JTable();
-        btnAdd = new javax.swing.JButton();
-        btnEdit = new javax.swing.JButton();
-        btnDelete = new javax.swing.JButton();
-        btnClose = new javax.swing.JButton();
-        lblStatus = new javax.swing.JLabel();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Матчи");
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("История матчей");
 
         tblMatches.setModel(new javax.swing.table.DefaultTableModel(
-                new Object [][] {},
-                new String [] {"Дата", "Команда 1", "Счет 1", "Счет 2", "Команда 2", "Площадка"}
+                new Object [][] {}, new String [] {"Дата", "Команда 1", "Счет 1", "Счет 2", "Команда 2", "Площадка"}
         ));
         jScrollPane1.setViewportView(tblMatches);
 
-        btnAdd.setText("Добавить");
         btnAdd.addActionListener(evt -> btnAddActionPerformed(evt));
-
-        btnEdit.setText("Изменить");
         btnEdit.addActionListener(evt -> btnEditActionPerformed(evt));
-
-        btnDelete.setText("Удалить");
+        btnStats.addActionListener(evt -> btnStatsActionPerformed(evt));
         btnDelete.addActionListener(evt -> btnDeleteActionPerformed(evt));
+        btnClose.addActionListener(evt -> this.dispose());
+
+        // Логика перелистывания страниц
+        btnPrevPage.addActionListener(evt -> { if (currentPage > 0) { currentPage--; loadMatchesAsync(); } });
+        btnNextPage.addActionListener(evt -> { if (currentPage < totalPages - 1) { currentPage++; loadMatchesAsync(); } });
+
+        // Панель пагинации
+        JPanel paginationPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        paginationPanel.add(btnPrevPage);
+        paginationPanel.add(lblStatus);
+        paginationPanel.add(btnNextPage);
+
+        // Панель кнопок действий
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        actionPanel.add(btnAdd); actionPanel.add(btnEdit); actionPanel.add(btnStats); actionPanel.add(btnDelete);
         
-        btnClose.setText("Закрыть");
-        btnClose.addActionListener(evt -> btnCloseActionPerformed(evt));
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(paginationPanel, BorderLayout.NORTH);
+        bottomPanel.add(actionPanel, BorderLayout.WEST);
+        bottomPanel.add(btnClose, BorderLayout.EAST);
 
-        lblStatus.setText("Статус");
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addComponent(btnAdd)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(btnEdit)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(btnDelete)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(btnClose))
-                                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblStatus)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(btnAdd)
-                                        .addComponent(btnEdit)
-                                        .addComponent(btnDelete)
-                                        .addComponent(btnClose))
-                                .addContainerGap())
-        );
+        getContentPane().setLayout(new BorderLayout(10, 10));
+        getContentPane().add(jScrollPane1, BorderLayout.CENTER);
+        getContentPane().add(bottomPanel, BorderLayout.SOUTH);
 
         pack();
+        setSize(800, 400);
     }// </editor-fold>
 
-    // Variables declaration - do not modify
-    private javax.swing.JButton btnAdd;
-    private javax.swing.JButton btnClose;
-    private javax.swing.JButton btnDelete;
-    private javax.swing.JButton btnEdit;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JLabel lblStatus;
-    private javax.swing.JTable tblMatches;
+    private JButton btnAdd, btnClose, btnDelete, btnEdit, btnStats;
+    private JButton btnPrevPage, btnNextPage;
+    private JScrollPane jScrollPane1;
+    private JLabel lblStatus;
+    private JTable tblMatches;
 }

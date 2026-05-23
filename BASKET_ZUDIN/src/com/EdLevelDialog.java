@@ -14,6 +14,8 @@ public class EdLevelDialog extends javax.swing.JDialog {
         
         // Установка имени для UI-тестов
         tfLevelName.setName("tfLevelName");
+        btnOk.setName("btnOk");
+        btnCancel.setName("btnCancel");
         
         this.setLocationRelativeTo(parent);
 

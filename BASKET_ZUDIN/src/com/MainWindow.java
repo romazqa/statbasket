@@ -6,6 +6,11 @@ import java.awt.GridLayout;
 import java.awt.Font;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import java.io.File;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.data.Matches;
 
 public class MainWindow extends javax.swing.JFrame {
 
@@ -22,7 +27,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     // --- Метод, который дизайнер не удалит ---
     private void setupCustomUI() {
-        JPanel mainPanel = new JPanel(new GridLayout(2, 2, 20, 20));
+    	JPanel mainPanel = new JPanel(new GridLayout(2, 2, 20, 20));
         mainPanel.setBorder(new EmptyBorder(30, 30, 30, 30));
 
         JButton btnNewMatch = createBigButton("НОВЫЙ МАТЧ", "🆕");
@@ -36,12 +41,21 @@ public class MainWindow extends javax.swing.JFrame {
 
         JButton btnPlayers = createBigButton("ИГРОКИ", "👤");
         btnPlayers.addActionListener(e -> openPlayers());
+        
+        // ----------------------------------
 
         mainPanel.add(btnNewMatch);
         mainPanel.add(btnMatches);
         mainPanel.add(btnTeams);
         mainPanel.add(btnPlayers);
-
+        
+        // 2. ДОБАВЛЯЕМ МЕНЮ "СЕРВИС" В ВЕРХНЮЮ ПАНЕЛЬ
+        JMenu menuTools = new JMenu("Сервис");
+        JMenuItem miSync = new JMenuItem("Синхронизация данных (Офлайн)");
+        miSync.addActionListener(e -> syncOfflineData());
+        menuTools.add(miSync);
+        jMenuBar1.add(menuTools);
+        
         // Перехватываем управление слоем у дизайнера
         this.getContentPane().setLayout(new BorderLayout());
         this.getContentPane().add(mainPanel, BorderLayout.CENTER);
@@ -89,6 +103,58 @@ public class MainWindow extends javax.swing.JFrame {
     private void openPlayers() {
         FrmPlayer frm = new FrmPlayer(this, true);
         frm.setVisible(true);
+    }
+    
+    private void syncOfflineData() {
+        // Ищем папку в домашней директории пользователя
+        String userHome = System.getProperty("user.home");
+        java.io.File backupDir = new java.io.File(userHome, ".statbasket_backups");
+        
+        if (!backupDir.exists()) {
+            JOptionPane.showMessageDialog(this, "Резервных файлов не найдено.", "Синхронизация", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // Берем файлы только из нашей папки
+        java.io.File[] files = backupDir.listFiles((d, name) -> name.startsWith("backup_match_") && name.endsWith(".json"));
+
+        if (files == null || files.length == 0) {
+            JOptionPane.showMessageDialog(this, "Резервных файлов не найдено.", "Синхронизация", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+            int successCount = 0;
+            int failCount = 0;
+
+            @Override
+            protected Void doInBackground() throws Exception {
+                ApiClient apiClient = new ApiClient();
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+                mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+                for (java.io.File file : files) {
+                    try {
+                        com.data.Matches match = mapper.readValue(file, com.data.Matches.class);
+                        apiClient.saveMatch(match);
+                        file.delete(); 
+                        successCount++;
+                    } catch (Exception e) {
+                        failCount++; 
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                String message = "Синхронизация завершена!\nУспешно отправлено на сервер: " + successCount + "\nОсталось с ошибкой сети: " + failCount;
+                int messageType = failCount == 0 ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE;
+                JOptionPane.showMessageDialog(MainWindow.this, message, "Результат синхронизации", messageType);
+            }
+        };
+        worker.execute();
     }
 
     //<editor-fold defaultstate="collapsed" desc="Generated Code">
